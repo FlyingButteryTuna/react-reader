@@ -2,7 +2,10 @@ import { Box, Flex, Slide } from "@chakra-ui/react";
 
 import ChapterText from "./components/ChapterText.tsx";
 import SettingsBar from "./components/SettingsBar.tsx";
+import SettingsWindow from "./components/SettingsWindow.tsx";
 import { createRef, useState } from "react";
+import { isSafari } from "react-device-detect";
+import { light } from "./components/ReaderThemes.tsx";
 
 function App() {
   let paragraphs = [
@@ -11,38 +14,46 @@ function App() {
 
   const parentRef: React.RefObject<HTMLDivElement> = createRef();
 
-  const [settingsVisibility, setVisibility] = useState(false);
+  const [sidebarVisibility, setSidebarVisibility] = useState(true);
+  const [settingsWindowHidden, setSettingsWindowHidden] = useState(true);
+  const [readerTheme, setReaderTheme] = useState(light);
+
   let lastWidthScrollPos = 0;
   const visibilityChangeThreshold = 7;
 
   const handleScroll = (event: React.UIEvent<HTMLElement>) => {
     let scrollSpeedDelta =
       Math.abs(event.currentTarget.scrollLeft) - lastWidthScrollPos;
-    console.log(scrollSpeedDelta);
-    if (scrollSpeedDelta > 5 && settingsVisibility && lastWidthScrollPos != 0) {
-      setVisibility(false);
-      console.log("hide");
+    if (scrollSpeedDelta > 1 && sidebarVisibility && lastWidthScrollPos != 0) {
+      setSidebarVisibility(false);
     } else if (
       scrollSpeedDelta < -visibilityChangeThreshold &&
-      !settingsVisibility &&
+      !sidebarVisibility &&
       lastWidthScrollPos != 0
     ) {
-      setVisibility(true);
-      console.log("show");
+      setSidebarVisibility(true);
     }
+
     lastWidthScrollPos = Math.abs(event.currentTarget.scrollLeft);
-    setTimeout(() => {
-      lastWidthScrollPos = 0;
-    }, 500);
+    if (lastWidthScrollPos < 18) {
+      setSidebarVisibility(true);
+    }
   };
 
   const handleVerticalScroll = (event: React.WheelEvent<HTMLDivElement>) => {
-    if (event.deltaX < 100 && event.deltaX > -100 && event.deltaY != 0) {
+    if (event.deltaY != 0 && settingsWindowHidden) {
       if (parentRef.current != undefined) {
-        parentRef.current.scrollTo(
-          parentRef.current.scrollLeft - event.deltaY,
-          0
-        );
+        if (isSafari) {
+          parentRef.current.scrollTo(
+            parentRef.current.scrollLeft - event.deltaY + event.deltaX,
+            0
+          );
+        } else {
+          parentRef.current.scrollTo(
+            parentRef.current.scrollLeft - event.deltaY,
+            0
+          );
+        }
       }
     }
   };
@@ -54,24 +65,24 @@ function App() {
   return (
     <>
       <Flex
+        position={"relative"}
         flexDir={"row-reverse"}
         justifyContent={"flex-start"}
         fontFamily="sans-serif"
-        lineHeight={"170%"}
-        overflowX={"scroll"}
+        lineHeight={"200%"}
+        overflowX={"auto"}
+        overflowY="hidden"
         maxHeight={"100vh"}
-        fontSize={{ base: "20px", md: "23px", lg: "25px" }}
+        fontSize={{ base: "20px", md: "23px", lg: "23px" }}
         onScroll={handleScroll}
         onWheel={handleVerticalScroll}
         ref={parentRef as React.RefObject<HTMLDivElement>}
+        pr={"60px"}
+        textColor={readerTheme.mainTextColor}
+        bgColor={readerTheme.mainBgColor}
+        width={"100%"}
+        height={"100%"}
       >
-        <Slide
-          in={settingsVisibility}
-          style={{ maxWidth: "80px", transitionDuration: "1ms" }}
-        >
-          <SettingsBar></SettingsBar>
-        </Slide>
-
         <Box
           display={"block"}
           sx={{
@@ -80,6 +91,8 @@ function App() {
           }}
           h="fit-content"
           py={["3vh", "5vh", "7vh", "12vh"]}
+          m="0"
+          filter={settingsWindowHidden ? "unset" : "opacity(0.5)"}
         >
           {paragraphs.map((object, i) => {
             return (
@@ -87,6 +100,15 @@ function App() {
             );
           })}
         </Box>
+
+        <SettingsWindow isHidden={settingsWindowHidden}></SettingsWindow>
+        <Slide in={sidebarVisibility} style={{ maxWidth: "80px" }}>
+          <SettingsBar
+            settingsWindowHidden={settingsWindowHidden}
+            setSettingsWindowHidden={setSettingsWindowHidden}
+            setReaderTheme={setReaderTheme}
+          ></SettingsBar>
+        </Slide>
       </Flex>
     </>
   );
