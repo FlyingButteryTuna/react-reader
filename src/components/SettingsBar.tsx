@@ -18,6 +18,14 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
     setSettingsWindowHidden(!settingsWindowHidden);
   };
 
+  const disableDoubleClickSelection = (
+    event: React.MouseEvent<HTMLElement>
+  ) => {
+    if (event.detail > 1) {
+      event.preventDefault();
+    }
+  };
+
   return (
     <Box
       bgColor={"white"}
@@ -28,6 +36,7 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
       position={"fixed"}
       hidden={false}
       width={"50px"}
+      onMouseDown={disableDoubleClickSelection}
     >
       <VStack
         py={4}
