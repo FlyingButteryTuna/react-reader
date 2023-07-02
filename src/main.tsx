@@ -17,6 +17,14 @@ const ruby = {
       standup: {
         textOrientation: "upright",
       },
+
+      body: {
+        overflowY: "hidden",
+        writingMode: "vertical-rl",
+
+        fontFamily:
+          "dcsymbols,'Helvetica Neue',Helvetica,Arial,'ヒラギノ角ゴ Pr6N','Hiragino Kaku Gothic Pr6N','ヒラギノ角ゴ ProN','Hiragino Kaku Gothic ProN','ヒラギノ角ゴ StdN','Hiragino Kaku Gothic StdN','Segoe UI',Verdana,'メイリオ',Meiryo,sans-serif",
+      },
     },
   },
 };

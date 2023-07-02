@@ -7,14 +7,16 @@ interface SettingsBarProps {
   settingsWindowHidden: boolean;
   setSettingsWindowHidden: React.Dispatch<React.SetStateAction<boolean>>;
   setReaderTheme: React.Dispatch<React.SetStateAction<ReaderThemes>>;
+  windowMaxHeight: number;
 }
 
 const SettingsBar: React.FC<SettingsBarProps> = ({
-  setReaderTheme,
+  //setReaderTheme,
   setSettingsWindowHidden,
   settingsWindowHidden,
+  windowMaxHeight,
 }) => {
-  const handleSettingIconClick = (event: React.MouseEvent<SVGElement>) => {
+  const handleSettingIconClick = () => {
     setSettingsWindowHidden(!settingsWindowHidden);
   };
 
@@ -31,46 +33,49 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
       bgColor={"white"}
       borderColor={"blackAlpha.300"}
       borderLeftWidth={"2px"}
-      minH={"100%"}
+      maxHeight={windowMaxHeight}
+      height={"100%"}
       right={"0px"}
-      position={"fixed"}
+      position={"sticky"}
       hidden={false}
       width={"50px"}
+      sx={{ writingMode: "horizontal-tb" }}
       onMouseDown={disableDoubleClickSelection}
     >
       <VStack
-        py={4}
-        px={3}
         textColor={"black"}
         width={"inherit"}
-        height={"100vh"}
-        maxHeight={window.innerHeight}
-        m={0}
+        height={"inherit"}
+        alignItems={"center"}
+        py={4}
+        pr={0}
       >
         <CloseIcon
           fontSize={"15px"}
           sx={{ _hover: { color: "cyan.500" } }}
           _focus={{ boxShadow: "outline" }}
         ></CloseIcon>
+
         <Divider orientation="horizontal" pt={3}></Divider>
+
         <Flex
-          flexDir={"row-reverse"}
           width={"inherit"}
+          flexDir={"row-reverse"}
           justifyContent={"center"}
-          pt={3}
-          pr={0.5}
+          flex={1}
+          mt={4}
+          lineHeight={1.2}
         >
           <Link
             fontSize={"13px"}
+            transition="transform 0.15s ease-out, fontWeight 0.15s ease-out"
+            display={"inline-block"}
             sx={{
               writingMode: "vertical-rl",
-              overflowWrap: "break-word",
             }}
-            lineHeight={"140%"}
-            transition="transform 0.15s ease-out, fontWeight 0.15s ease-out"
             _hover={{
-              transform: "scale(1.02, 1.02)",
-              fontWeight: "semibold",
+              textDecorationLine: "overline",
+              textColor: "cyan.500",
               textDecorationStyle: "none",
             }}
             href="https://github.com/chakra-ui/chakra-ui/issues/6173"
@@ -79,27 +84,17 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
           </Link>
 
           <Text
+            display={"block"}
             fontSize={"13px"}
-            sx={{
-              writingMode: "vertical-rl",
-              overflowWrap: "break-word",
-            }}
-            lineHeight={"140%"}
             color={"blackAlpha.700"}
+            sx={{ writingMode: "vertical-rl" }}
+            as={"span"}
           >
             章チャプターのタイトル
           </Text>
         </Flex>
 
-        <Flex
-          w={"inherit"}
-          flexDir={"column"}
-          alignItems={"center"}
-          flexGrow={"1"}
-          maxHeight={"100%"}
-          justifyContent={"end"}
-          flexWrap={"nowrap"}
-        >
+        <Flex flexDir={"column"} alignItems={"center"} mt={"20vh"}>
           <SettingsIconVertical
             sx={{ _hover: { color: "cyan.500" } }}
             _focus={{ boxShadow: "outline" }}
@@ -107,7 +102,7 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
             color={settingsWindowHidden ? "black" : "cyan.500"}
             onClick={handleSettingIconClick}
           ></SettingsIconVertical>
-          <HamburgerIcon mt={3}></HamburgerIcon>
+          <HamburgerIcon fontSize={"19px"} mt={3}></HamburgerIcon>
         </Flex>
       </VStack>
     </Box>

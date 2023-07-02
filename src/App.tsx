@@ -1,10 +1,10 @@
-import { Box, Flex, Slide } from "@chakra-ui/react";
+import { Box, Slide } from "@chakra-ui/react";
 
 import ChapterText from "./components/ChapterText.tsx";
 import SettingsBar from "./components/SettingsBar.tsx";
 import SettingsWindow from "./components/SettingsWindow.tsx";
-import { createRef, useState } from "react";
-import { isSafari } from "react-device-detect";
+import { createRef, useEffect, useState } from "react";
+import { isFirefox, isSafari } from "react-device-detect";
 import { light } from "./components/ReaderThemes.tsx";
 
 function App() {
@@ -17,82 +17,151 @@ function App() {
   const [sidebarVisibility, setSidebarVisibility] = useState(true);
   const [settingsWindowHidden, setSettingsWindowHidden] = useState(true);
   const [readerTheme, setReaderTheme] = useState(light);
+  const [readerFontSize, setReaderFontSize] = useState("23px");
+  const [readerLineSpacing, setReaderLineSpacing] = useState("200%");
+  const [readerVMargins, setReaderVMargins] = useState("5vh");
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    heigth: window.innerHeight,
+  });
 
   let lastWidthScrollPos = 0;
-  const visibilityChangeThreshold = 7;
+  const visibilityChangeThreshold = -5;
 
-  const handleScroll = (event: React.UIEvent<HTMLElement>) => {
-    let scrollSpeedDelta =
-      Math.abs(event.currentTarget.scrollLeft) - lastWidthScrollPos;
-    if (scrollSpeedDelta > 1 && sidebarVisibility && lastWidthScrollPos != 0) {
+  const handleScroll = (scrollLeft: number) => {
+    let scrollSpeedDelta = Math.abs(scrollLeft) - lastWidthScrollPos;
+    if (scrollSpeedDelta >= 1 && sidebarVisibility && lastWidthScrollPos != 0) {
       setSidebarVisibility(false);
     } else if (
-      scrollSpeedDelta < -visibilityChangeThreshold &&
+      scrollSpeedDelta < visibilityChangeThreshold &&
       !sidebarVisibility &&
       lastWidthScrollPos != 0
     ) {
       setSidebarVisibility(true);
     }
 
-    lastWidthScrollPos = Math.abs(event.currentTarget.scrollLeft);
+    lastWidthScrollPos = Math.abs(scrollLeft);
     if (lastWidthScrollPos < 18) {
       setSidebarVisibility(true);
     }
   };
 
-  const handleVerticalScroll = (event: React.WheelEvent<HTMLDivElement>) => {
+  const handleHorizontalScroll = (
+    event: React.WheelEvent<HTMLDivElement> | WheelEvent,
+    scrollLeft: number
+  ) => {
     if (event.deltaY != 0 && settingsWindowHidden) {
-      if (parentRef.current != undefined) {
-        if (isSafari) {
-          parentRef.current.scrollTo(
-            parentRef.current.scrollLeft - event.deltaY + event.deltaX,
-            0
-          );
-        } else {
-          parentRef.current.scrollTo(
-            parentRef.current.scrollLeft - event.deltaY,
-            0
-          );
-        }
+      let x: number;
+      if (isSafari || isFirefox) {
+        x = scrollLeft - event.deltaY + event.deltaX;
+      } else {
+        x = scrollLeft - event.deltaY;
+      }
+      if (event.currentTarget == undefined) {
+        scrollTo(x, 0);
+      } else if ("scrollTo" in event.currentTarget) {
+        event.currentTarget.scrollTo(x, 0);
       }
     }
   };
 
-  for (let i = 0; i < 100; i++) {
+  const handleScrollDiv = (event: React.MouseEvent<HTMLDivElement>) => {
+    handleScroll(event.currentTarget.scrollLeft);
+  };
+
+  const handleHorizontalScrollDiv = (
+    event: React.WheelEvent<HTMLDivElement>
+  ) => {
+    handleHorizontalScroll(event, event.currentTarget.scrollLeft);
+  };
+
+  const handleScrollWindow = () => {
+    handleScroll(window.scrollX);
+  };
+
+  const handleHorizontalScrollWindow = (event: WheelEvent) => {
+    handleHorizontalScroll(event, window.scrollX);
+  };
+
+  const handleCloseSettingsOnClick = () => {
+    if (!settingsWindowHidden) {
+      setSettingsWindowHidden(!settingsWindowHidden);
+    }
+  };
+
+  const handleResize = () => {
+    setWindowSize({
+      width: window.innerWidth,
+      heigth: window.innerHeight,
+    });
+  };
+
+  const windowMaxHeight =
+    window.innerHeight > window.innerWidth
+      ? window.innerHeight
+      : window.innerWidth;
+
+  for (let i = 0; i < 20; i++) {
     paragraphs.push(paragraphs[0].concat("penis" + i));
   }
 
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    if (!isSafari) {
+      window.addEventListener("wheel", handleHorizontalScrollWindow);
+      window.addEventListener("scroll", handleScrollWindow);
+    }
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (!isSafari) {
+        window.removeEventListener("wheel", handleHorizontalScrollWindow);
+        window.removeEventListener("scroll", handleScrollWindow);
+      }
+    };
+  }, [handleResize]);
+
   return (
     <>
-      <Flex
-        position={"relative"}
-        flexDir={"row-reverse"}
-        justifyContent={"flex-start"}
-        fontFamily="sans-serif"
-        lineHeight={"200%"}
-        overflowX={"auto"}
-        overflowY="hidden"
-        maxHeight={"100vh"}
-        fontSize={{ base: "20px", md: "23px", lg: "23px" }}
-        onScroll={handleScroll}
-        onWheel={handleVerticalScroll}
+      <SettingsWindow
+        isHidden={settingsWindowHidden}
+        setReaderFontSize={setReaderFontSize}
+        setReaderLineSpacing={setReaderLineSpacing}
+        setReaderVMargins={setReaderVMargins}
+        setSettingsWindowHidden={setSettingsWindowHidden}
+      ></SettingsWindow>
+
+      <Slide in={sidebarVisibility} style={{ maxWidth: "50px", zIndex: 100 }}>
+        <SettingsBar
+          settingsWindowHidden={settingsWindowHidden}
+          setSettingsWindowHidden={setSettingsWindowHidden}
+          setReaderTheme={setReaderTheme}
+          windowMaxHeight={windowMaxHeight}
+        ></SettingsBar>
+      </Slide>
+      <Box
         ref={parentRef as React.RefObject<HTMLDivElement>}
-        pr={"60px"}
+        position={"relative"}
+        lineHeight={readerLineSpacing}
+        overflow={"auto"}
+        fontSize={readerFontSize}
         textColor={readerTheme.mainTextColor}
         bgColor={readerTheme.mainBgColor}
-        width={"100%"}
-        height={"100%"}
+        pr={"60px"}
+        my={"auto"}
+        py={readerVMargins}
+        height={windowSize.heigth}
+        width={isSafari ? windowSize.width : "fit-content"}
+        onScroll={isSafari ? handleScrollDiv : () => {}}
+        onWheel={isSafari ? handleHorizontalScrollDiv : () => {}}
+        onClick={handleCloseSettingsOnClick}
+        zIndex={1}
       >
         <Box
-          display={"block"}
-          sx={{
-            writingMode: "vertical-rl",
-            overflowWrap: "break-word",
-          }}
-          h="fit-content"
-          py={["3vh", "5vh", "7vh", "12vh"]}
-          m="0"
-          filter={settingsWindowHidden ? "unset" : "opacity(0.5)"}
+          height={"fit-content"}
+          width={"fit-content"}
+          filter={settingsWindowHidden ? "unset" : "opacity(0.3)"}
+          userSelect={settingsWindowHidden ? "auto" : "none"}
         >
           {paragraphs.map((object, i) => {
             return (
@@ -100,16 +169,7 @@ function App() {
             );
           })}
         </Box>
-
-        <SettingsWindow isHidden={settingsWindowHidden}></SettingsWindow>
-        <Slide in={sidebarVisibility} style={{ maxWidth: "80px" }}>
-          <SettingsBar
-            settingsWindowHidden={settingsWindowHidden}
-            setSettingsWindowHidden={setSettingsWindowHidden}
-            setReaderTheme={setReaderTheme}
-          ></SettingsBar>
-        </Slide>
-      </Flex>
+      </Box>
     </>
   );
 }
