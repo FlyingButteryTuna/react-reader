@@ -5,7 +5,7 @@ import SettingsBar from "./components/SettingsBar.tsx";
 import SettingsWindow from "./components/SettingsWindow.tsx";
 import { createRef, useEffect, useState } from "react";
 import { isFirefox, isSafari } from "react-device-detect";
-import { light } from "./components/ReaderThemes.tsx";
+import { themes } from "./components/ReaderThemes.ts";
 
 function App() {
   let paragraphs = [
@@ -14,9 +14,9 @@ function App() {
 
   const parentRef: React.RefObject<HTMLDivElement> = createRef();
 
+  const [readerTheme, setReaderTheme] = useState(themes.light);
   const [sidebarVisibility, setSidebarVisibility] = useState(true);
   const [settingsWindowHidden, setSettingsWindowHidden] = useState(true);
-  const [readerTheme, setReaderTheme] = useState(light);
   const [readerFontSize, setReaderFontSize] = useState("23px");
   const [readerLineSpacing, setReaderLineSpacing] = useState("200%");
   const [readerVMargins, setReaderVMargins] = useState("5vh");
@@ -24,6 +24,8 @@ function App() {
     width: window.innerWidth,
     heigth: window.innerHeight,
   });
+
+  const dimScreenFunc = "brightness(0.3)";
 
   let lastWidthScrollPos = 0;
   const visibilityChangeThreshold = -5;
@@ -129,14 +131,24 @@ function App() {
         setReaderLineSpacing={setReaderLineSpacing}
         setReaderVMargins={setReaderVMargins}
         setSettingsWindowHidden={setSettingsWindowHidden}
+        setReaderTheme={setReaderTheme}
+        readerTheme={readerTheme}
       ></SettingsWindow>
 
-      <Slide in={sidebarVisibility} style={{ maxWidth: "50px", zIndex: 100 }}>
+      <Slide
+        in={sidebarVisibility}
+        style={{
+          maxWidth: "50px",
+          zIndex: 100,
+          filter: settingsWindowHidden ? "unset" : dimScreenFunc,
+        }}
+      >
         <SettingsBar
           settingsWindowHidden={settingsWindowHidden}
           setSettingsWindowHidden={setSettingsWindowHidden}
           setReaderTheme={setReaderTheme}
           windowMaxHeight={windowMaxHeight}
+          readerTheme={readerTheme}
         ></SettingsBar>
       </Slide>
       <Box
@@ -155,12 +167,15 @@ function App() {
         onScroll={isSafari ? handleScrollDiv : () => {}}
         onWheel={isSafari ? handleHorizontalScrollDiv : () => {}}
         onClick={handleCloseSettingsOnClick}
+        filter={settingsWindowHidden ? "unset" : dimScreenFunc}
         zIndex={1}
       >
         <Box
           height={"fit-content"}
           width={"fit-content"}
-          filter={settingsWindowHidden ? "unset" : "opacity(0.3)"}
+          minWidth={windowSize.width}
+          textColor={"inherit"}
+          bgColor={"inherit"}
           userSelect={settingsWindowHidden ? "auto" : "none"}
         >
           {paragraphs.map((object, i) => {

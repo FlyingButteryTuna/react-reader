@@ -2,6 +2,7 @@ import { Box, Button, Text, useMediaQuery } from "@chakra-ui/react";
 import { useState } from "react";
 import IncDecSettings from "./IncDecSettings";
 import ReaderThemesSettings from "./ThemesSettings";
+import { ReaderTheme } from "./ReaderThemes.ts";
 
 interface SettingsWindowProps {
   isHidden: boolean;
@@ -9,6 +10,8 @@ interface SettingsWindowProps {
   setReaderLineSpacing: React.Dispatch<React.SetStateAction<string>>;
   setReaderVMargins: React.Dispatch<React.SetStateAction<string>>;
   setSettingsWindowHidden: React.Dispatch<React.SetStateAction<boolean>>;
+  setReaderTheme: React.Dispatch<React.SetStateAction<ReaderTheme>>;
+  readerTheme: ReaderTheme;
 }
 
 const SettingsWindow: React.FC<SettingsWindowProps> = ({
@@ -17,6 +20,8 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
   setReaderLineSpacing,
   setReaderVMargins,
   setSettingsWindowHidden,
+  setReaderTheme,
+  readerTheme,
 }) => {
   const [isLargerThan640] = useMediaQuery("(min-width: 640px)");
 
@@ -72,6 +77,9 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
       flexDir={"column"}
       rowGap={"2"}
       minWidth={"249px"}
+      border={"2px"}
+      borderColor={"aqua"}
+      boxShadow={"0 0 300px #333"}
       onClick={handleStopPropagation}
       onMouseDown={disableDoubleClickSelection}
     >
@@ -161,7 +169,10 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
         ></IncDecSettings>
       </Box>
 
-      <ReaderThemesSettings></ReaderThemesSettings>
+      <ReaderThemesSettings
+        setReaderTheme={setReaderTheme}
+        readerTheme={readerTheme}
+      ></ReaderThemesSettings>
     </Box>
   );
 };

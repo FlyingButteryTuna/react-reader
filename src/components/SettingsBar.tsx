@@ -1,13 +1,14 @@
 import { Box, Link, Divider, Flex, Text, VStack } from "@chakra-ui/react";
 import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import SettingsIconVertical from "./SettingsIconVertical";
-import { ReaderThemes } from "./ReaderThemes.tsx";
+import { ReaderTheme } from "./ReaderThemes.ts";
 
 interface SettingsBarProps {
   settingsWindowHidden: boolean;
   setSettingsWindowHidden: React.Dispatch<React.SetStateAction<boolean>>;
-  setReaderTheme: React.Dispatch<React.SetStateAction<ReaderThemes>>;
+  setReaderTheme: React.Dispatch<React.SetStateAction<ReaderTheme>>;
   windowMaxHeight: number;
+  readerTheme: ReaderTheme;
 }
 
 const SettingsBar: React.FC<SettingsBarProps> = ({
@@ -15,6 +16,7 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
   setSettingsWindowHidden,
   settingsWindowHidden,
   windowMaxHeight,
+  readerTheme,
 }) => {
   const handleSettingIconClick = () => {
     setSettingsWindowHidden(!settingsWindowHidden);
@@ -30,9 +32,10 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
 
   return (
     <Box
-      bgColor={"white"}
-      borderColor={"blackAlpha.300"}
+      bgColor={readerTheme.mainBgColor}
+      borderColor={readerTheme.settingsBarBorderColor}
       borderLeftWidth={"2px"}
+      color={"magenta"}
       maxHeight={windowMaxHeight}
       height={"100%"}
       right={"0px"}
@@ -43,17 +46,19 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
       onMouseDown={disableDoubleClickSelection}
     >
       <VStack
-        textColor={"black"}
+        textColor={readerTheme.mainTextColor}
         width={"inherit"}
         height={"inherit"}
+        maxHeight={"inherit"}
         alignItems={"center"}
         py={4}
-        pr={0}
+        px={3}
       >
         <CloseIcon
           fontSize={"15px"}
-          sx={{ _hover: { color: "cyan.500" } }}
+          sx={{ _hover: { color: readerTheme.settingsBarHoverColor } }}
           _focus={{ boxShadow: "outline" }}
+          cursor={"pointer"}
         ></CloseIcon>
 
         <Divider orientation="horizontal" pt={3}></Divider>
@@ -62,45 +67,60 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
           width={"inherit"}
           flexDir={"row-reverse"}
           justifyContent={"center"}
-          flex={1}
+          flexGrow={1}
+          flexShrink={1}
           mt={4}
-          lineHeight={1.2}
+          lineHeight={"1.2"}
+          minHeight={0}
         >
           <Link
+            display={"block"}
             fontSize={"13px"}
             transition="transform 0.15s ease-out, fontWeight 0.15s ease-out"
-            display={"inline-block"}
             sx={{
               writingMode: "vertical-rl",
             }}
+            pr={"0.1"}
             _hover={{
-              textDecorationLine: "overline",
-              textColor: "cyan.500",
+              textDecorationLine: "none",
+              textColor: readerTheme.settingsBarHoverColor,
               textDecorationStyle: "none",
             }}
             href="https://github.com/chakra-ui/chakra-ui/issues/6173"
+            textOverflow={"ellipsis"}
+            height={"inherit"}
+            whiteSpace={"nowrap"}
+            overflow={"hidden"}
           >
-            第シリーズのタイトル
+            シリーズのタイトル
           </Link>
 
           <Text
             display={"block"}
             fontSize={"13px"}
-            color={"blackAlpha.700"}
+            color={readerTheme.subTitleTextColor}
             sx={{ writingMode: "vertical-rl" }}
-            as={"span"}
+            textOverflow={"ellipsis"}
+            height={"inherit"}
+            whiteSpace={"nowrap"}
+            overflow={"hidden"}
           >
             章チャプターのタイトル
           </Text>
         </Flex>
 
-        <Flex flexDir={"column"} alignItems={"center"} mt={"20vh"}>
+        <Flex flexDir={"column"} alignItems={"center"}>
           <SettingsIconVertical
-            sx={{ _hover: { color: "cyan.500" } }}
+            sx={{ _hover: { color: readerTheme.settingsBarHoverColor } }}
             _focus={{ boxShadow: "outline" }}
             fontSize={"35px"}
-            color={settingsWindowHidden ? "black" : "cyan.500"}
+            color={
+              settingsWindowHidden
+                ? readerTheme.mainTextColor
+                : readerTheme.settingsBarHoverColor
+            }
             onClick={handleSettingIconClick}
+            cursor={"pointer"}
           ></SettingsIconVertical>
           <HamburgerIcon fontSize={"19px"} mt={3}></HamburgerIcon>
         </Flex>

@@ -48,7 +48,10 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
       border={"1px"}
       rounded={10}
       minWidth={"100%"}
+      height={"auto"}
       p={1}
+      userSelect={"none"}
+      cursor={"default"}
     >
       <Text
         fontSize={"12px"}
@@ -56,6 +59,7 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
         sx={{
           writingMode: "vertical-rl",
         }}
+        cursor={"default"}
       >
         {settingHeader}
       </Text>

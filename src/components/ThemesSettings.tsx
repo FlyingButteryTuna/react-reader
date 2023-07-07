@@ -1,8 +1,16 @@
 import { Box } from "@chakra-ui/react";
+import ThemeElement from "./ThemeElement";
+import { themes, ReaderTheme } from "./ReaderThemes.ts";
 
-interface ReaderThemesSettingsProps {}
+interface ReaderThemesSettingsProps {
+  setReaderTheme: React.Dispatch<React.SetStateAction<ReaderTheme>>;
+  readerTheme: ReaderTheme;
+}
 
-const ReaderThemesSettings: React.FC<ReaderThemesSettingsProps> = () => {
+const ReaderThemesSettings: React.FC<ReaderThemesSettingsProps> = ({
+  setReaderTheme,
+  readerTheme,
+}) => {
   return (
     <Box
       display={"flex"}
@@ -12,7 +20,24 @@ const ReaderThemesSettings: React.FC<ReaderThemesSettingsProps> = () => {
       rounded={10}
       my={2}
       ml={2}
-    ></Box>
+      p={"2"}
+      sx={{
+        writingMode: "horizontal-tb",
+      }}
+      justifyContent={"space-between"}
+      textAlign={"center"}
+    >
+      {Object.entries(themes).map((value, i) => {
+        return (
+          <ThemeElement
+            theme={value[1]}
+            isSelected={value[1] == readerTheme ? true : false}
+            setReaderTheme={setReaderTheme}
+            key={i}
+          ></ThemeElement>
+        );
+      })}
+    </Box>
   );
 };
 
