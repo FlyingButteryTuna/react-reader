@@ -5,7 +5,7 @@ import SettingsBar from "./components/SettingsBar.tsx";
 import SettingsWindow from "./components/SettingsWindow.tsx";
 import { createRef, useEffect, useState } from "react";
 import { isFirefox, isSafari } from "react-device-detect";
-import { themes } from "./components/ReaderThemes.ts";
+import { themes, myoucyouFont } from "./components/ReaderThemes.ts";
 
 function App() {
   let paragraphs = [
@@ -20,6 +20,8 @@ function App() {
   const [readerFontSize, setReaderFontSize] = useState("23px");
   const [readerLineSpacing, setReaderLineSpacing] = useState("200%");
   const [readerVMargins, setReaderVMargins] = useState("5vh");
+  const [readerFont, setReaderFont] = useState(myoucyouFont);
+
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     heigth: window.innerHeight,
@@ -130,6 +132,7 @@ function App() {
         setReaderFontSize={setReaderFontSize}
         setReaderLineSpacing={setReaderLineSpacing}
         setReaderVMargins={setReaderVMargins}
+        setReaderFont={setReaderFont}
         setSettingsWindowHidden={setSettingsWindowHidden}
         setReaderTheme={setReaderTheme}
         readerTheme={readerTheme}
@@ -155,14 +158,16 @@ function App() {
         ref={parentRef as React.RefObject<HTMLDivElement>}
         position={"relative"}
         lineHeight={readerLineSpacing}
+        fontFamily={readerFont}
         overflow={"auto"}
+        overflowY={"hidden"}
         fontSize={readerFontSize}
         textColor={readerTheme.mainTextColor}
         bgColor={readerTheme.mainBgColor}
         pr={"60px"}
         my={"auto"}
         py={readerVMargins}
-        height={windowSize.heigth}
+        height={windowSize.heigth - 4}
         width={isSafari ? windowSize.width : "fit-content"}
         onScroll={isSafari ? handleScrollDiv : () => {}}
         onWheel={isSafari ? handleHorizontalScrollDiv : () => {}}

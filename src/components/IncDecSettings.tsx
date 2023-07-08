@@ -22,20 +22,21 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
 }) => {
   const handleIncrese = (event: React.MouseEvent<HTMLLIElement>) => {
     event.preventDefault();
+    event.stopPropagation();
     if (selectedSetting < numberOfSizes) {
-      let hehe = selectedSetting + 1;
-      setSelected(hehe);
-      setSetting(settingsArray[hehe - 1]);
-      window.focus();
+      let newSetting = selectedSetting + 1;
+      setSelected(newSetting);
+      setSetting(settingsArray[newSetting - 1]);
     }
   };
 
-  const handleDecrese = () => {
+  const handleDecrese = (event: React.MouseEvent<HTMLLIElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
     if (selectedSetting > 1) {
-      let hehe = selectedSetting - 1;
-      setSelected(hehe);
-      setSetting(settingsArray[hehe - 1]);
-      window.scrollTo(0, 0);
+      let newSetting = selectedSetting - 1;
+      setSelected(newSetting);
+      setSetting(settingsArray[newSetting - 1]);
     }
   };
 
@@ -60,6 +61,7 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
           writingMode: "vertical-rl",
         }}
         cursor={"default"}
+        fontWeight={"semibold"}
       >
         {settingHeader}
       </Text>
@@ -86,7 +88,7 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
             WebkitTransform: "translate3d(0, 0, 0) !important",
           }}
           _hover={{
-            backgroundColor: "cyan.500",
+            borderColor: "cyan.500",
           }}
           onClick={handleIncrese}
           cursor={"pointer"}
@@ -106,7 +108,7 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
             WebkitTransform: "translate3d(0, 0, 0) !important",
           }}
           _hover={{
-            backgroundColor: "cyan.500",
+            borderColor: "cyan.500",
           }}
           onClick={handleDecrese}
           cursor={"pointer"}

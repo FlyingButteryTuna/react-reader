@@ -5,7 +5,23 @@ export interface ReaderTheme {
   settingsBarBorderColor: string;
   subTitleTextColor: string;
   settingsBarHoverColor: string;
+  toolTipStyle: toolTipStyle;
 }
+
+interface toolTipStyle {
+  bgColor: string;
+  textColor: string;
+}
+
+const darkToolTipStyle: toolTipStyle = {
+  bgColor: "black",
+  textColor: "white",
+};
+
+const lightToolTipStyle: toolTipStyle = {
+  bgColor: "white",
+  textColor: "black",
+};
 
 const light: ReaderTheme = {
   themeName: "白",
@@ -14,6 +30,7 @@ const light: ReaderTheme = {
   settingsBarBorderColor: "blackAlpha.300",
   subTitleTextColor: "blackAlpha.700",
   settingsBarHoverColor: "cyan.500",
+  toolTipStyle: darkToolTipStyle,
 };
 
 const black: ReaderTheme = {
@@ -23,6 +40,7 @@ const black: ReaderTheme = {
   settingsBarBorderColor: "whiteAlpha.500",
   subTitleTextColor: "whiteAlpha.700",
   settingsBarHoverColor: "cyan",
+  toolTipStyle: lightToolTipStyle,
 };
 
 const night: ReaderTheme = {
@@ -32,6 +50,7 @@ const night: ReaderTheme = {
   settingsBarBorderColor: "whiteAlpha.500",
   subTitleTextColor: "whiteAlpha.600",
   settingsBarHoverColor: "cyan",
+  toolTipStyle: lightToolTipStyle,
 };
 
 const sepia: ReaderTheme = {
@@ -41,6 +60,7 @@ const sepia: ReaderTheme = {
   settingsBarBorderColor: "blackAlpha.400",
   subTitleTextColor: "blackAlpha.600",
   settingsBarHoverColor: "cyan.500",
+  toolTipStyle: darkToolTipStyle,
 };
 
 const blue: ReaderTheme = {
@@ -50,6 +70,7 @@ const blue: ReaderTheme = {
   settingsBarBorderColor: "whiteAlpha.700",
   subTitleTextColor: "whiteAlpha.700",
   settingsBarHoverColor: "#00E4FF",
+  toolTipStyle: lightToolTipStyle,
 };
 
 export const themes = {
@@ -59,3 +80,9 @@ export const themes = {
   sepia: sepia,
   blue: blue,
 };
+
+export const myoucyouFont =
+  '"游明朝", YuMincho, "Hiragino Mincho ProN W3", "ヒラギノ明朝 ProN W3", "Hiragino Mincho ProN", "HG明朝E", "ＭＳ Ｐ明朝", "ＭＳ 明朝", serif;';
+
+export const gothicFont =
+  '"Hiragino Sans W3", "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif';

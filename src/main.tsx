@@ -18,10 +18,9 @@ const ruby = {
         textOrientation: "upright",
       },
       body: {
-        overflowY: "hidden",
         writingMode: "vertical-rl",
-        fontFamily:
-          "dcsymbols,'Helvetica Neue',Helvetica,Arial,'ヒラギノ角ゴ Pr6N','Hiragino Kaku Gothic Pr6N','ヒラギノ角ゴ ProN','Hiragino Kaku Gothic ProN','ヒラギノ角ゴ StdN','Hiragino Kaku Gothic StdN','Segoe UI',Verdana,'メイリオ',Meiryo,sans-serif",
+        margin: 0,
+        padding: 0,
       },
       html: {
         scrollbarWidth: "thin",
@@ -29,6 +28,7 @@ const ruby = {
       },
       "&::-webkit-scrollbar": {
         height: "4px",
+        width: "4px",
       },
 
       "&::-webkit-scrollbar-thumb": {

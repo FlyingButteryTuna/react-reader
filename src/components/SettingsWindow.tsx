@@ -2,13 +2,15 @@ import { Box, Button, Text, useMediaQuery } from "@chakra-ui/react";
 import { useState } from "react";
 import IncDecSettings from "./IncDecSettings";
 import ReaderThemesSettings from "./ThemesSettings";
-import { ReaderTheme } from "./ReaderThemes.ts";
+import { ReaderTheme, myoucyouFont, gothicFont } from "./ReaderThemes.ts";
+import ChoiceSettings from "./ChoiceSettings.tsx";
 
 interface SettingsWindowProps {
   isHidden: boolean;
   setReaderFontSize: React.Dispatch<React.SetStateAction<string>>;
   setReaderLineSpacing: React.Dispatch<React.SetStateAction<string>>;
   setReaderVMargins: React.Dispatch<React.SetStateAction<string>>;
+  setReaderFont: React.Dispatch<React.SetStateAction<string>>;
   setSettingsWindowHidden: React.Dispatch<React.SetStateAction<boolean>>;
   setReaderTheme: React.Dispatch<React.SetStateAction<ReaderTheme>>;
   readerTheme: ReaderTheme;
@@ -19,6 +21,7 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
   setReaderFontSize,
   setReaderLineSpacing,
   setReaderVMargins,
+  setReaderFont,
   setSettingsWindowHidden,
   setReaderTheme,
   readerTheme,
@@ -35,6 +38,9 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
 
   const [selectedVMargins, setSelectedVMargins] = useState(2);
   const vMargins = ["2vh", "5vh", "8vh", "11vh", "14vh", "17vh", "20vh"];
+
+  const [selectedFont, setSelectedFont] = useState(1);
+  const fonts = [myoucyouFont, gothicFont];
 
   const handleStopPropagation = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -137,6 +143,7 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
         sx={{
           writingMode: "horizontal-tb",
         }}
+        overflow={"auto"}
       >
         <IncDecSettings
           setSetting={setReaderFontSize}
@@ -167,6 +174,16 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
           settingHeader={"余白サイズ"}
           forceRepaint={true}
         ></IncDecSettings>
+
+        <ChoiceSettings
+          settingHeader={"フォント"}
+          settingOneName={"明朝"}
+          settingTwoName={"ゴシック"}
+          setSetting={setReaderFont}
+          selectedSetting={selectedFont}
+          setSelectedSetting={setSelectedFont}
+          settingsArray={fonts}
+        ></ChoiceSettings>
       </Box>
 
       <ReaderThemesSettings

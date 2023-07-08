@@ -1,4 +1,12 @@
-import { Box, Link, Divider, Flex, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Link,
+  Divider,
+  Flex,
+  Text,
+  VStack,
+  Tooltip,
+} from "@chakra-ui/react";
 import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import SettingsIconVertical from "./SettingsIconVertical";
 import { ReaderTheme } from "./ReaderThemes.ts";
@@ -35,7 +43,6 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
       bgColor={readerTheme.mainBgColor}
       borderColor={readerTheme.settingsBarBorderColor}
       borderLeftWidth={"2px"}
-      color={"magenta"}
       maxHeight={windowMaxHeight}
       height={"100%"}
       right={"0px"}
@@ -51,15 +58,26 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
         height={"inherit"}
         maxHeight={"inherit"}
         alignItems={"center"}
+        justifyContent={"center"}
         py={4}
         px={3}
       >
-        <CloseIcon
-          fontSize={"15px"}
-          sx={{ _hover: { color: readerTheme.settingsBarHoverColor } }}
-          _focus={{ boxShadow: "outline" }}
-          cursor={"pointer"}
-        ></CloseIcon>
+        <Tooltip
+          hasArrow
+          label={"閉じる"}
+          fontSize={"small"}
+          placement={"left"}
+          backgroundColor={readerTheme.toolTipStyle.bgColor}
+          textColor={readerTheme.toolTipStyle.textColor}
+        >
+          <CloseIcon
+            minWidth={"35px"}
+            fontSize={"15px"}
+            sx={{ _hover: { color: readerTheme.settingsBarHoverColor } }}
+            _focus={{ boxShadow: "outline" }}
+            cursor={"pointer"}
+          ></CloseIcon>
+        </Tooltip>
 
         <Divider orientation="horizontal" pt={3}></Divider>
 
@@ -70,7 +88,7 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
           flexGrow={1}
           flexShrink={1}
           mt={4}
-          lineHeight={"1.2"}
+          lineHeight={"1.1"}
           minHeight={0}
         >
           <Link
@@ -80,7 +98,6 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
             sx={{
               writingMode: "vertical-rl",
             }}
-            pr={"0.1"}
             _hover={{
               textDecorationLine: "none",
               textColor: readerTheme.settingsBarHoverColor,
@@ -109,20 +126,42 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
           </Text>
         </Flex>
 
-        <Flex flexDir={"column"} alignItems={"center"}>
-          <SettingsIconVertical
-            sx={{ _hover: { color: readerTheme.settingsBarHoverColor } }}
-            _focus={{ boxShadow: "outline" }}
-            fontSize={"35px"}
-            color={
-              settingsWindowHidden
-                ? readerTheme.mainTextColor
-                : readerTheme.settingsBarHoverColor
-            }
-            onClick={handleSettingIconClick}
-            cursor={"pointer"}
-          ></SettingsIconVertical>
-          <HamburgerIcon fontSize={"19px"} mt={3}></HamburgerIcon>
+        <Flex flexDir={"column"} alignItems={"center"} flexBasis={"35px"}>
+          <Tooltip
+            hasArrow
+            label={"ビューワー設定"}
+            fontSize={"small"}
+            placement={"left"}
+            backgroundColor={readerTheme.toolTipStyle.bgColor}
+            textColor={readerTheme.toolTipStyle.textColor}
+          >
+            <SettingsIconVertical
+              sx={{ _hover: { color: readerTheme.settingsBarHoverColor } }}
+              _focus={{ boxShadow: "outline" }}
+              fontSize={"35px"}
+              color={
+                settingsWindowHidden
+                  ? readerTheme.mainTextColor
+                  : readerTheme.settingsBarHoverColor
+              }
+              onClick={handleSettingIconClick}
+              cursor={"pointer"}
+            ></SettingsIconVertical>
+          </Tooltip>
+          <Tooltip
+            hasArrow
+            label={"目次"}
+            fontSize={"small"}
+            placement={"left"}
+            backgroundColor={readerTheme.toolTipStyle.bgColor}
+            textColor={readerTheme.toolTipStyle.textColor}
+          >
+            <HamburgerIcon
+              fontSize={"25px"}
+              mt={3}
+              minWidth={"35px"}
+            ></HamburgerIcon>
+          </Tooltip>
         </Flex>
       </VStack>
     </Box>
