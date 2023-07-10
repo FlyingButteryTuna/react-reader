@@ -4,10 +4,14 @@ interface ChoiceSettingsProps {
   settingHeader: string;
   settingOneName: string;
   settingTwoName: string;
-  setSetting: React.Dispatch<React.SetStateAction<string>>;
+  setSetting: React.Dispatch<React.SetStateAction<any>>;
   selectedSetting: number;
   setSelectedSetting: React.Dispatch<React.SetStateAction<number>>;
   settingsArray: Array<any>;
+  shouldScrollToStart: boolean;
+  setShouldScrollToStart:
+    | React.Dispatch<React.SetStateAction<boolean>>
+    | undefined;
 }
 
 const ChoiceSettings: React.FC<ChoiceSettingsProps> = ({
@@ -18,9 +22,21 @@ const ChoiceSettings: React.FC<ChoiceSettingsProps> = ({
   selectedSetting,
   setSelectedSetting,
   settingsArray,
+  shouldScrollToStart,
+  setShouldScrollToStart,
 }) => {
-  const handleSettingChange = (chosenSetting: number) => {
+  const handleSettingChange = (
+    chosenSetting: number,
+    shouldScrollToStart: boolean
+  ) => {
     if (chosenSetting != selectedSetting) {
+      if (
+        shouldScrollToStart &&
+        chosenSetting == 1 &&
+        setShouldScrollToStart != undefined
+      ) {
+        setShouldScrollToStart(true);
+      }
       setSetting(settingsArray[chosenSetting - 1]);
       setSelectedSetting(chosenSetting);
     }
@@ -28,12 +44,12 @@ const ChoiceSettings: React.FC<ChoiceSettingsProps> = ({
   const handleSettingOneClick = (event: React.MouseEvent<HTMLLIElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    handleSettingChange(1);
+    handleSettingChange(1, shouldScrollToStart);
   };
   const handleSettingTwoClick = (event: React.MouseEvent<HTMLLIElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    handleSettingChange(2);
+    handleSettingChange(2, shouldScrollToStart);
   };
 
   return (
@@ -45,7 +61,7 @@ const ChoiceSettings: React.FC<ChoiceSettingsProps> = ({
       border={"1px"}
       rounded={10}
       minWidth={"100%"}
-      minH={"20%"}
+      minH={"100px"}
       height={"auto"}
       p={1}
       userSelect={"none"}
@@ -77,8 +93,9 @@ const ChoiceSettings: React.FC<ChoiceSettingsProps> = ({
         <ListItem
           display={"flex"}
           fontSize={"15px"}
-          minH={"100%"}
+          h={"fit-content"}
           minW={"45%"}
+          minH={"100%"}
           border={"1px"}
           sx={{
             WebkitTransform: "translate3d(0, 0, 0) !important",
@@ -89,6 +106,7 @@ const ChoiceSettings: React.FC<ChoiceSettingsProps> = ({
           }}
           cursor={"pointer"}
           onClick={handleSettingOneClick}
+          whiteSpace={"nowrap"}
         >
           <Text as={"span"} m={"auto"} sx={{ writingMode: "vertical-rl" }}>
             {settingOneName}
@@ -98,8 +116,9 @@ const ChoiceSettings: React.FC<ChoiceSettingsProps> = ({
           display={"flex"}
           py={1}
           fontSize={"15px"}
-          minH={"100%"}
+          h={"fit-content"}
           minW={"45%"}
+          minH={"100%"}
           border={"1px"}
           sx={{
             WebkitTransform: "translate3d(0, 0, 0) !important",
@@ -110,6 +129,7 @@ const ChoiceSettings: React.FC<ChoiceSettingsProps> = ({
           }}
           cursor={"pointer"}
           onClick={handleSettingTwoClick}
+          whiteSpace={"nowrap"}
         >
           <Text as={"span"} m={"auto"} sx={{ writingMode: "vertical-rl" }}>
             {settingTwoName}

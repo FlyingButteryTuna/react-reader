@@ -9,6 +9,7 @@ interface IncDecSettingsProps {
   settingsArray: string[];
   settingHeader: string;
   forceRepaint: boolean;
+  lockSetting: boolean;
 }
 
 const IncDecSettings: React.FC<IncDecSettingsProps> = ({
@@ -19,6 +20,7 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
   settingsArray,
   settingHeader,
   forceRepaint,
+  lockSetting,
 }) => {
   const handleIncrese = (event: React.MouseEvent<HTMLLIElement>) => {
     event.preventDefault();
@@ -52,7 +54,8 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
       height={"auto"}
       p={1}
       userSelect={"none"}
-      cursor={"default"}
+      cursor={lockSetting ? "not-allowed" : "default"}
+      textColor={lockSetting ? "gray" : "unset"}
     >
       <Text
         fontSize={"12px"}
@@ -60,7 +63,7 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
         sx={{
           writingMode: "vertical-rl",
         }}
-        cursor={"default"}
+        cursor={lockSetting ? "not-allowed" : "default"}
         fontWeight={"semibold"}
       >
         {settingHeader}
@@ -88,10 +91,10 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
             WebkitTransform: "translate3d(0, 0, 0) !important",
           }}
           _hover={{
-            borderColor: "cyan.500",
+            borderColor: lockSetting ? "unset" : "cyan.500",
           }}
-          onClick={handleIncrese}
-          cursor={"pointer"}
+          onClick={lockSetting ? () => {} : handleIncrese}
+          cursor={lockSetting ? "not-allowed" : "pointer"}
         >
           <Text as={"span"} m={"auto"}>
             ＋
@@ -108,10 +111,10 @@ const IncDecSettings: React.FC<IncDecSettingsProps> = ({
             WebkitTransform: "translate3d(0, 0, 0) !important",
           }}
           _hover={{
-            borderColor: "cyan.500",
+            borderColor: lockSetting ? "unset" : "cyan.500",
           }}
-          onClick={handleDecrese}
-          cursor={"pointer"}
+          onClick={lockSetting ? () => {} : handleDecrese}
+          cursor={lockSetting ? "not-allowed" : "pointer"}
         >
           <Text as={"span"} m={"auto"}>
             ー

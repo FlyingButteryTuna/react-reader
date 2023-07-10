@@ -6,6 +6,7 @@ export interface ReaderTheme {
   subTitleTextColor: string;
   settingsBarHoverColor: string;
   toolTipStyle: toolTipStyle;
+  pageBackground: string;
 }
 
 interface toolTipStyle {
@@ -23,6 +24,10 @@ const lightToolTipStyle: toolTipStyle = {
   textColor: "black",
 };
 
+const getPageBackground = (color: string) => {
+  return `body { background: ${color} }`;
+};
+
 const light: ReaderTheme = {
   themeName: "白",
   mainBgColor: "white",
@@ -31,6 +36,7 @@ const light: ReaderTheme = {
   subTitleTextColor: "blackAlpha.700",
   settingsBarHoverColor: "cyan.500",
   toolTipStyle: darkToolTipStyle,
+  pageBackground: getPageBackground("#EDEDED"),
 };
 
 const black: ReaderTheme = {
@@ -41,6 +47,7 @@ const black: ReaderTheme = {
   subTitleTextColor: "whiteAlpha.700",
   settingsBarHoverColor: "cyan",
   toolTipStyle: lightToolTipStyle,
+  pageBackground: getPageBackground("#0F0F0F"),
 };
 
 const night: ReaderTheme = {
@@ -51,6 +58,7 @@ const night: ReaderTheme = {
   subTitleTextColor: "whiteAlpha.600",
   settingsBarHoverColor: "cyan",
   toolTipStyle: lightToolTipStyle,
+  pageBackground: getPageBackground("#161820"),
 };
 
 const sepia: ReaderTheme = {
@@ -61,6 +69,7 @@ const sepia: ReaderTheme = {
   subTitleTextColor: "blackAlpha.600",
   settingsBarHoverColor: "cyan.500",
   toolTipStyle: darkToolTipStyle,
+  pageBackground: getPageBackground("#E3E2D5"),
 };
 
 const blue: ReaderTheme = {
@@ -71,6 +80,7 @@ const blue: ReaderTheme = {
   subTitleTextColor: "whiteAlpha.700",
   settingsBarHoverColor: "#00E4FF",
   toolTipStyle: lightToolTipStyle,
+  pageBackground: getPageBackground("#1C4E6D"),
 };
 
 export const themes = {
@@ -86,3 +96,8 @@ export const myoucyouFont =
 
 export const gothicFont =
   '"Hiragino Sans W3", "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif';
+
+export const enum readerModes {
+  Tategumi = 1,
+  Yokogumi,
+}

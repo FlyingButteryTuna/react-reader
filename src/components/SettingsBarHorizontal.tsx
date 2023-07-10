@@ -4,26 +4,22 @@ import {
   Divider,
   Flex,
   Text,
-  VStack,
   Tooltip,
+  HStack,
 } from "@chakra-ui/react";
 import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
-import SettingsIconVertical from "./SettingsIconVertical";
+import SettingsIconVertical from "./SettingsIconVertical.tsx";
 import { ReaderTheme } from "./ReaderThemes.ts";
 
-interface SettingsBarProps {
+interface SettingsBarHorizontalProps {
   settingsWindowHidden: boolean;
   setSettingsWindowHidden: React.Dispatch<React.SetStateAction<boolean>>;
-  setReaderTheme: React.Dispatch<React.SetStateAction<ReaderTheme>>;
-  windowMaxHeight: number;
   readerTheme: ReaderTheme;
 }
 
-const SettingsBar: React.FC<SettingsBarProps> = ({
-  //setReaderTheme,
+const SettingsBarHorizontal: React.FC<SettingsBarHorizontalProps> = ({
   setSettingsWindowHidden,
   settingsWindowHidden,
-  windowMaxHeight,
   readerTheme,
 }) => {
   const handleSettingIconClick = () => {
@@ -42,61 +38,62 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
     <Box
       bgColor={readerTheme.mainBgColor}
       borderColor={readerTheme.settingsBarBorderColor}
-      borderLeftWidth={"2px"}
-      maxHeight={windowMaxHeight}
-      height={"100%"}
-      right={"0px"}
-      position={"sticky"}
-      hidden={false}
-      width={"50px"}
+      borderBottomWidth={"2px"}
+      height={"50px"}
+      top={"0px"}
+      position={"fixed"}
+      width={"100vw"}
       sx={{ writingMode: "horizontal-tb" }}
+      zIndex={2}
       onMouseDown={disableDoubleClickSelection}
     >
-      <VStack
+      <HStack
         textColor={readerTheme.mainTextColor}
         width={"inherit"}
         height={"inherit"}
-        maxHeight={"inherit"}
         alignItems={"center"}
-        justifyContent={"center"}
-        py={4}
-        px={3}
+        pl={"15px"}
+        pr={2}
+        py={3}
       >
         <Tooltip
           hasArrow
           label={"閉じる"}
           fontSize={"small"}
-          placement={"left"}
+          placement={"bottom"}
+          sx={{ writingMode: "horizontal-tb" }}
           backgroundColor={readerTheme.toolTipStyle.bgColor}
           textColor={readerTheme.toolTipStyle.textColor}
         >
-          <CloseIcon
-            minWidth={"35px"}
-            fontSize={"15px"}
+          <Flex
+            minHeight={"50px"}
             sx={{ _hover: { color: readerTheme.settingsBarHoverColor } }}
-            _focus={{ boxShadow: "outline" }}
             cursor={"pointer"}
-          ></CloseIcon>
+          >
+            <CloseIcon
+              m={"auto"}
+              fontSize={"15px"}
+              minWidth={"35px"}
+              color={"inherit"}
+            ></CloseIcon>
+          </Flex>
         </Tooltip>
 
-        <Divider orientation="horizontal" pt={3}></Divider>
+        <Divider orientation="vertical"></Divider>
 
         <Flex
-          width={"inherit"}
-          flexDir={"row-reverse"}
+          flexDir={"column"}
           justifyContent={"center"}
           flexGrow={1}
-          flexShrink={1}
-          mt={4}
-          lineHeight={"1.1"}
-          minHeight={0}
+          lineHeight={"short"}
+          height={"inherit"}
         >
           <Link
             display={"block"}
             fontSize={"13px"}
             transition="transform 0.15s ease-out, fontWeight 0.15s ease-out"
             sx={{
-              writingMode: "vertical-rl",
+              writingMode: "horizontal-tb",
             }}
             _hover={{
               textDecorationLine: "none",
@@ -105,7 +102,7 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
             }}
             href="https://github.com/chakra-ui/chakra-ui/issues/6173"
             textOverflow={"ellipsis"}
-            height={"inherit"}
+            height={"fit-content"}
             whiteSpace={"nowrap"}
             overflow={"hidden"}
           >
@@ -116,9 +113,11 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
             display={"block"}
             fontSize={"13px"}
             color={readerTheme.subTitleTextColor}
-            sx={{ writingMode: "vertical-rl" }}
+            sx={{
+              writingMode: "horizontal-tb",
+            }}
             textOverflow={"ellipsis"}
-            height={"inherit"}
+            height={"fit-content"}
             whiteSpace={"nowrap"}
             overflow={"hidden"}
           >
@@ -126,46 +125,68 @@ const SettingsBar: React.FC<SettingsBarProps> = ({
           </Text>
         </Flex>
 
-        <Flex flexDir={"column"} alignItems={"center"} flexBasis={"35px"}>
+        <Flex
+          flexDir={"row"}
+          height={"inherit"}
+          width={"100%"}
+          justifyContent={"center"}
+          alignItems={"center"}
+          flexBasis={"35px"}
+        >
           <Tooltip
             hasArrow
             label={"ビューワー設定"}
             fontSize={"small"}
-            placement={"left"}
+            placement={"bottom"}
             backgroundColor={readerTheme.toolTipStyle.bgColor}
             textColor={readerTheme.toolTipStyle.textColor}
+            sx={{ writingMode: "horizontal-tb" }}
           >
-            <SettingsIconVertical
+            <Flex
+              minHeight={"50px"}
               sx={{ _hover: { color: readerTheme.settingsBarHoverColor } }}
-              _focus={{ boxShadow: "outline" }}
-              fontSize={"35px"}
               color={
                 settingsWindowHidden
                   ? readerTheme.mainTextColor
                   : readerTheme.settingsBarHoverColor
               }
-              onClick={handleSettingIconClick}
               cursor={"pointer"}
-            ></SettingsIconVertical>
+              onClick={handleSettingIconClick}
+            >
+              <SettingsIconVertical
+                m={"auto"}
+                fontSize={"35px"}
+                color={"inherit"}
+              ></SettingsIconVertical>
+            </Flex>
           </Tooltip>
+
           <Tooltip
             hasArrow
             label={"目次"}
             fontSize={"small"}
-            placement={"left"}
+            placement={"bottom"}
+            sx={{ writingMode: "horizontal-tb" }}
             backgroundColor={readerTheme.toolTipStyle.bgColor}
             textColor={readerTheme.toolTipStyle.textColor}
           >
-            <HamburgerIcon
-              fontSize={"25px"}
-              mt={3}
-              minWidth={"35px"}
-            ></HamburgerIcon>
+            <Flex
+              minHeight={"50px"}
+              sx={{ _hover: { color: readerTheme.settingsBarHoverColor } }}
+              cursor={"pointer"}
+            >
+              <HamburgerIcon
+                m={"auto"}
+                fontSize={"25px"}
+                minWidth={"35px"}
+                color={"inherit"}
+              ></HamburgerIcon>
+            </Flex>
           </Tooltip>
         </Flex>
-      </VStack>
+      </HStack>
     </Box>
   );
 };
 
-export default SettingsBar;
+export default SettingsBarHorizontal;

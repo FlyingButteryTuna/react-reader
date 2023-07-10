@@ -18,22 +18,11 @@ const ruby = {
         textOrientation: "upright",
       },
       body: {
-        writingMode: "vertical-rl",
-        margin: 0,
-        padding: 0,
+        WebkitTextSizeAdjust: "none",
+        WebkitFontSmoothing: "antialiased",
       },
       html: {
-        scrollbarWidth: "thin",
-        scrollbarColor: "gray white",
-      },
-      "&::-webkit-scrollbar": {
-        height: "4px",
-        width: "4px",
-      },
-
-      "&::-webkit-scrollbar-thumb": {
-        background: "gray",
-        borderRadius: "1px",
+        WebkitTextSizeAdjust: "none",
       },
     },
   },

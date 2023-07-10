@@ -1,11 +1,16 @@
-import { Box, Slide } from "@chakra-ui/react";
+import { Box, Slide, calc } from "@chakra-ui/react";
 
 import ChapterText from "./components/ChapterText.tsx";
-import SettingsBar from "./components/SettingsBar.tsx";
 import SettingsWindow from "./components/SettingsWindow.tsx";
 import { createRef, useEffect, useState } from "react";
-import { isFirefox, isSafari } from "react-device-detect";
-import { themes, myoucyouFont } from "./components/ReaderThemes.ts";
+import { isFirefox, isMobileSafari, isSafari } from "react-device-detect";
+import {
+  themes,
+  myoucyouFont,
+  readerModes,
+} from "./components/ReaderThemes.ts";
+import SettingsBarVertical from "./components/SettingsBarVertical.tsx";
+import SettingsBarHorizontal from "./components/SettingsBarHorizontal.tsx";
 
 function App() {
   let paragraphs = [
@@ -19,72 +24,127 @@ function App() {
   const [settingsWindowHidden, setSettingsWindowHidden] = useState(true);
   const [readerFontSize, setReaderFontSize] = useState("23px");
   const [readerLineSpacing, setReaderLineSpacing] = useState("200%");
-  const [readerVMargins, setReaderVMargins] = useState("5vh");
+  const [readerVMargins, setReaderVMargins] = useState("8vh");
   const [readerFont, setReaderFont] = useState(myoucyouFont);
-
+  const [readerMode, setReaderMode] = useState(readerModes.Tategumi);
+  const [shouldScrollToStart, setShouldScrollToStart] = useState(true);
+  const [horizontalStartPos, setHorizontalStartPos] = useState(-1);
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
-    heigth: window.innerHeight,
+    height: window.innerHeight,
   });
+
+  const handleResize = () => {
+    setWindowSize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+    setShouldScrollToStart(true);
+  };
 
   const dimScreenFunc = "brightness(0.3)";
 
-  let lastWidthScrollPos = 0;
-  const visibilityChangeThreshold = -5;
+  const verticalWR = "body { writing-mode: vertical-rl }";
+  const horizontalWR = "body { writing-mode: horizontal-tb }";
 
-  const handleScroll = (scrollLeft: number) => {
+  const isTategumi = readerMode == readerModes.Tategumi;
+  const isYokogumi = readerMode == readerModes.Yokogumi;
+  const writngMode = isMobileSafari
+    ? horizontalWR
+    : isTategumi
+    ? verticalWR
+    : horizontalWR;
+
+  const outerDivWidthBase = isYokogumi ? "100%" : "max-content";
+  const outerDivWidthDesktopSafari = isTategumi ? windowSize.width : "100%";
+  const outerDivWidth =
+    isSafari && !isMobileSafari
+      ? outerDivWidthDesktopSafari
+      : outerDivWidthBase;
+  const outerDivHeight = isYokogumi ? "max-content" : "100%";
+
+  let lastWidthScrollPos = 0;
+  const showSettingsBarThreshold = 1;
+  const hideSettingsBarThreshold = -5;
+  const startAreaThreshold = 18;
+
+  const handleScroll = (scrollLeft: number, isReverse: boolean) => {
     let scrollSpeedDelta = Math.abs(scrollLeft) - lastWidthScrollPos;
-    if (scrollSpeedDelta >= 1 && sidebarVisibility && lastWidthScrollPos != 0) {
+    let shouldShow = isReverse
+      ? scrollSpeedDelta < -showSettingsBarThreshold
+      : scrollSpeedDelta > showSettingsBarThreshold;
+    let shouldHide = isReverse
+      ? scrollSpeedDelta > -hideSettingsBarThreshold
+      : scrollSpeedDelta < hideSettingsBarThreshold;
+
+    if (shouldShow && sidebarVisibility && lastWidthScrollPos != 0) {
       setSidebarVisibility(false);
-    } else if (
-      scrollSpeedDelta < visibilityChangeThreshold &&
-      !sidebarVisibility &&
-      lastWidthScrollPos != 0
-    ) {
+    } else if (shouldHide && !sidebarVisibility && lastWidthScrollPos != 0) {
       setSidebarVisibility(true);
     }
-
     lastWidthScrollPos = Math.abs(scrollLeft);
-    if (lastWidthScrollPos < 18) {
+    shouldShow = isReverse
+      ? horizontalStartPos - startAreaThreshold < lastWidthScrollPos
+      : startAreaThreshold > lastWidthScrollPos;
+
+    if (shouldShow) {
       setSidebarVisibility(true);
     }
   };
 
-  const handleHorizontalScroll = (
+  const handleWheelScroll = (
     event: React.WheelEvent<HTMLDivElement> | WheelEvent,
-    scrollLeft: number
+    scrollLeft: number,
+    scrollTop: number
   ) => {
     if (event.deltaY != 0 && settingsWindowHidden) {
       let x: number;
+      let y: number;
       if (isSafari || isFirefox) {
         x = scrollLeft - event.deltaY + event.deltaX;
       } else {
         x = scrollLeft - event.deltaY;
       }
+      if (window.scrollY != 0) {
+        y = scrollTop + event.deltaY;
+      } else {
+        y = 0;
+      }
+
       if (event.currentTarget == undefined) {
-        scrollTo(x, 0);
+        scrollTo(x, y);
       } else if ("scrollTo" in event.currentTarget) {
-        event.currentTarget.scrollTo(x, 0);
+        event.currentTarget.scrollTo(x, y);
       }
     }
   };
 
-  const handleScrollDiv = (event: React.MouseEvent<HTMLDivElement>) => {
-    handleScroll(event.currentTarget.scrollLeft);
-  };
-
-  const handleHorizontalScrollDiv = (
-    event: React.WheelEvent<HTMLDivElement>
-  ) => {
-    handleHorizontalScroll(event, event.currentTarget.scrollLeft);
-  };
-
   const handleScrollWindow = () => {
-    handleScroll(window.scrollX);
+    handleScroll(
+      isTategumi ? window.scrollX : window.scrollY,
+      isMobileSafari && isTategumi ? true : false
+    );
   };
 
-  const handleHorizontalScrollWindow = (event: WheelEvent) => {
-    handleHorizontalScroll(event, window.scrollX);
+  const handleWheelScrollWindow = (event: WheelEvent) => {
+    handleWheelScroll(event, window.scrollX, window.scrollY);
+  };
+
+  const handleScrollDiv = (event: React.UIEvent<HTMLDivElement>) => {
+    handleScroll(
+      isTategumi
+        ? event.currentTarget.scrollLeft
+        : event.currentTarget.scrollTop,
+      false
+    );
+  };
+
+  const handleWheelScrollDiv = (event: React.WheelEvent<HTMLDivElement>) => {
+    handleWheelScroll(
+      event,
+      event.currentTarget.scrollLeft,
+      event.currentTarget.scrollTop
+    );
   };
 
   const handleCloseSettingsOnClick = () => {
@@ -93,40 +153,72 @@ function App() {
     }
   };
 
-  const handleResize = () => {
-    setWindowSize({
-      width: window.innerWidth,
-      heigth: window.innerHeight,
-    });
-  };
-
-  const windowMaxHeight =
-    window.innerHeight > window.innerWidth
-      ? window.innerHeight
-      : window.innerWidth;
-
   for (let i = 0; i < 20; i++) {
     paragraphs.push(paragraphs[0].concat("penis" + i));
   }
 
   useEffect(() => {
-    window.addEventListener("resize", handleResize);
-    if (!isSafari) {
-      window.addEventListener("wheel", handleHorizontalScrollWindow);
-      window.addEventListener("scroll", handleScrollWindow);
+    if ((isMobileSafari || isSafari) && isTategumi) {
+      window.addEventListener("resize", handleResize);
     }
 
+    if (shouldScrollToStart && isTategumi && isMobileSafari) {
+      window.scrollTo(document.body.scrollWidth - window.innerWidth, 0);
+      setTimeout(() => {
+        setHorizontalStartPos(window.scrollX);
+      }, 500);
+      setHorizontalStartPos(window.scrollX);
+    }
+
+    if (isTategumi) {
+      window.addEventListener("wheel", handleWheelScrollWindow);
+    }
+
+    window.addEventListener("scroll", handleScrollWindow);
+
     return () => {
-      window.removeEventListener("resize", handleResize);
-      if (!isSafari) {
-        window.removeEventListener("wheel", handleHorizontalScrollWindow);
-        window.removeEventListener("scroll", handleScrollWindow);
+      if (isTategumi) {
+        window.removeEventListener("wheel", handleWheelScrollWindow);
       }
+      window.removeEventListener("scroll", handleScrollWindow);
+
+      if ((isMobileSafari || isSafari) && isTategumi) {
+        window.removeEventListener("resize", handleResize);
+      }
+      setShouldScrollToStart(false);
     };
-  }, [handleResize]);
+  }, [
+    handleResize,
+    handleWheelScrollWindow,
+    handleScrollWindow,
+    setShouldScrollToStart,
+    shouldScrollToStart,
+    setHorizontalStartPos,
+  ]);
 
   return (
     <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: writngMode,
+        }}
+      />
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: readerTheme.pageBackground,
+        }}
+      />
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html:
+            isSafari && !isMobileSafari && isTategumi
+              ? "body {overflow: hidden}"
+              : "",
+        }}
+      />
+
       <SettingsWindow
         isHidden={settingsWindowHidden}
         setReaderFontSize={setReaderFontSize}
@@ -136,52 +228,94 @@ function App() {
         setSettingsWindowHidden={setSettingsWindowHidden}
         setReaderTheme={setReaderTheme}
         readerTheme={readerTheme}
+        setReaderMode={setReaderMode}
+        readerMode={readerMode}
+        setShouldScrollToStart={setShouldScrollToStart}
       ></SettingsWindow>
 
       <Slide
         in={sidebarVisibility}
         style={{
-          maxWidth: "50px",
-          zIndex: 100,
+          width: "100%",
+          height: "100%",
+          maxWidth: isTategumi ? "50px" : "unset",
+          maxHeight: isYokogumi ? "50px" : "unset",
+          zIndex: 2,
           filter: settingsWindowHidden ? "unset" : dimScreenFunc,
         }}
+        direction={isTategumi ? "right" : "top"}
       >
-        <SettingsBar
-          settingsWindowHidden={settingsWindowHidden}
-          setSettingsWindowHidden={setSettingsWindowHidden}
-          setReaderTheme={setReaderTheme}
-          windowMaxHeight={windowMaxHeight}
-          readerTheme={readerTheme}
-        ></SettingsBar>
+        {isTategumi ? (
+          <SettingsBarVertical
+            settingsWindowHidden={settingsWindowHidden}
+            setSettingsWindowHidden={setSettingsWindowHidden}
+            readerTheme={readerTheme}
+          ></SettingsBarVertical>
+        ) : (
+          <SettingsBarHorizontal
+            settingsWindowHidden={settingsWindowHidden}
+            setSettingsWindowHidden={setSettingsWindowHidden}
+            readerTheme={readerTheme}
+          ></SettingsBarHorizontal>
+        )}
       </Slide>
-      <Box
-        ref={parentRef as React.RefObject<HTMLDivElement>}
+
+      <Box //outer main div
+        display={"flex"}
+        flexDir={"row"}
+        justifyContent={"center"}
         position={"relative"}
+        width={outerDivWidth}
+        height={outerDivHeight}
+        alignItems={"center"}
         lineHeight={readerLineSpacing}
         fontFamily={readerFont}
-        overflow={"auto"}
-        overflowY={"hidden"}
         fontSize={readerFontSize}
         textColor={readerTheme.mainTextColor}
         bgColor={readerTheme.mainBgColor}
-        pr={"60px"}
-        my={"auto"}
-        py={readerVMargins}
-        height={windowSize.heigth - 4}
-        width={isSafari ? windowSize.width : "fit-content"}
-        onScroll={isSafari ? handleScrollDiv : () => {}}
-        onWheel={isSafari ? handleHorizontalScrollDiv : () => {}}
-        onClick={handleCloseSettingsOnClick}
-        filter={settingsWindowHidden ? "unset" : dimScreenFunc}
+        overflowY={isTategumi ? "hidden" : "auto"}
+        overflowX={isYokogumi ? "hidden" : "auto"}
         zIndex={1}
+        filter={settingsWindowHidden ? "unset" : dimScreenFunc}
+        onClick={handleCloseSettingsOnClick}
+        onWheel={isSafari && !isMobileSafari ? handleWheelScrollDiv : () => {}}
+        onScroll={isSafari && !isMobileSafari ? handleScrollDiv : () => {}}
+        ref={parentRef as React.RefObject<HTMLDivElement>}
+        sx={{
+          writingMode: isMobileSafari && isTategumi ? "vertical-rl" : "inherit",
+        }}
+        css={{
+          "&::-webkit-scrollbar": {
+            position: "relative",
+            display: "block",
+            height: "6px",
+            width: "1px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "#333333",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "#B0AEAE",
+            borderRadius: "0px",
+          },
+        }}
+        pt={isTategumi ? readerVMargins : "60px"}
+        pb={isTategumi ? readerVMargins : "unset"}
+        pr={isTategumi ? "60px" : "4%"}
+        pl={isTategumi ? "undet" : "4%"}
+        //p={"10"}
       >
-        <Box
-          height={"fit-content"}
+        <Box //inner main div
+          m={"auto"}
+          position={"relative"}
+          maxWidth={isYokogumi ? "665px" : "unset"}
+          //maxHeight={isTategumi ? "665px" : "unset"}
           width={"fit-content"}
-          minWidth={windowSize.width}
+          height={"fit-content"}
           textColor={"inherit"}
           bgColor={"inherit"}
           userSelect={settingsWindowHidden ? "auto" : "none"}
+          cursor={settingsWindowHidden ? "auto" : "default"}
         >
           {paragraphs.map((object, i) => {
             return (
