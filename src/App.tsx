@@ -1,4 +1,4 @@
-import { Box, Slide, calc } from "@chakra-ui/react";
+import { Box, Slide } from "@chakra-ui/react";
 
 import ChapterText from "./components/ChapterText.tsx";
 import SettingsWindow from "./components/SettingsWindow.tsx";
@@ -9,8 +9,7 @@ import {
   myoucyouFont,
   readerModes,
 } from "./components/ReaderThemes.ts";
-import SettingsBarVertical from "./components/SettingsBarVertical.tsx";
-import SettingsBarHorizontal from "./components/SettingsBarHorizontal.tsx";
+import SettingsBar from "./components/SettingsBar.tsx";
 
 function App() {
   let paragraphs = [
@@ -33,13 +32,29 @@ function App() {
     width: window.innerWidth,
     height: window.innerHeight,
   });
+  const [scrollWidthScale, setScrollWidthScale] = useState(-1.0);
+
+  enum screenOrientation {
+    portrait,
+    landscape,
+  }
 
   const handleResize = () => {
+    let oldOrientation =
+      windowSize.width / windowSize.height > 1
+        ? screenOrientation.landscape
+        : screenOrientation.portrait;
+    let newOrientation =
+      window.innerWidth / window.innerHeight > 1
+        ? screenOrientation.landscape
+        : screenOrientation.portrait;
+    if (oldOrientation != newOrientation) {
+      setShouldScrollToStart(true);
+    }
     setWindowSize({
       width: window.innerWidth,
       height: window.innerHeight,
     });
-    setShouldScrollToStart(true);
   };
 
   const dimScreenFunc = "brightness(0.3)";
@@ -69,6 +84,11 @@ function App() {
   const startAreaThreshold = 18;
 
   const handleScroll = (scrollLeft: number, isReverse: boolean) => {
+    if (isMobileSafari) {
+      setScrollWidthScale(
+        scrollLeft / (document.body.scrollWidth - window.innerWidth)
+      );
+    }
     let scrollSpeedDelta = Math.abs(scrollLeft) - lastWidthScrollPos;
     let shouldShow = isReverse
       ? scrollSpeedDelta < -showSettingsBarThreshold
@@ -158,16 +178,27 @@ function App() {
   }
 
   useEffect(() => {
+    if (isYokogumi) {
+      setScrollWidthScale(-1.0); //reset scroll restoration on reader mode change
+    }
     if ((isMobileSafari || isSafari) && isTategumi) {
-      window.addEventListener("resize", handleResize);
+      window.addEventListener("resize", handleResize); //handle resize for safari (outer div width/height is constrained by wSize)
     }
 
     if (shouldScrollToStart && isTategumi && isMobileSafari) {
-      window.scrollTo(document.body.scrollWidth - window.innerWidth, 0);
-      setTimeout(() => {
-        setHorizontalStartPos(window.scrollX);
-      }, 500);
-      setHorizontalStartPos(window.scrollX);
+      window.scrollTo(document.body.scrollWidth - window.innerWidth, 0); //scroll to the right (start)
+
+      setHorizontalStartPos(window.scrollX); //store new position as initial scroll value
+
+      if (scrollWidthScale != -1.0) {
+        window.scrollTo(
+          (document.body.scrollWidth - window.innerWidth) * scrollWidthScale,
+          0
+        ); //scroll restoration
+        setScrollWidthScale(-1.0);
+      } else {
+        setSidebarVisibility(true); //show settings bar on initial load
+      }
     }
 
     if (isTategumi) {
@@ -245,19 +276,12 @@ function App() {
         }}
         direction={isTategumi ? "right" : "top"}
       >
-        {isTategumi ? (
-          <SettingsBarVertical
-            settingsWindowHidden={settingsWindowHidden}
-            setSettingsWindowHidden={setSettingsWindowHidden}
-            readerTheme={readerTheme}
-          ></SettingsBarVertical>
-        ) : (
-          <SettingsBarHorizontal
-            settingsWindowHidden={settingsWindowHidden}
-            setSettingsWindowHidden={setSettingsWindowHidden}
-            readerTheme={readerTheme}
-          ></SettingsBarHorizontal>
-        )}
+        <SettingsBar
+          settingsWindowHidden={settingsWindowHidden}
+          setSettingsWindowHidden={setSettingsWindowHidden}
+          readerTheme={readerTheme}
+          readerMode={readerMode}
+        ></SettingsBar>
       </Slide>
 
       <Box //outer main div
@@ -303,13 +327,11 @@ function App() {
         pb={isTategumi ? readerVMargins : "unset"}
         pr={isTategumi ? "60px" : "4%"}
         pl={isTategumi ? "undet" : "4%"}
-        //p={"10"}
       >
         <Box //inner main div
           m={"auto"}
           position={"relative"}
           maxWidth={isYokogumi ? "665px" : "unset"}
-          //maxHeight={isTategumi ? "665px" : "unset"}
           width={"fit-content"}
           height={"fit-content"}
           textColor={"inherit"}
