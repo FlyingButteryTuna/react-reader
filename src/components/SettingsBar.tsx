@@ -59,7 +59,7 @@ const SettingsBar: React.FC<SettingsBarVerticalProps> = ({
     backgroundColor: readerTheme.toolTipStyle.bgColor,
     textColor: readerTheme.toolTipStyle.textColor,
     sx: { ...{ writingMode: writingMode } },
-    marginRight: isSafari ? "20px" : "unset",
+    marginRight: isSafari && isTategumi ? "20px" : "unset",
   };
 
   return (
