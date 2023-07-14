@@ -1,32 +1,36 @@
-import { Box, Slide } from "@chakra-ui/react";
-
-import ChapterText from "./components/ChapterText.tsx";
-import SettingsWindow from "./components/SettingsWindow.tsx";
-import { createRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { isFirefox, isMobileSafari, isSafari } from "react-device-detect";
-import {
-  themes,
-  myoucyouFont,
-  readerModes,
-} from "./components/ReaderThemes.ts";
-import SettingsBar from "./components/SettingsBar.tsx";
+import { readerModes } from "./reader/settings-consts/readerSettings.ts";
+import { Box, Flex, Interpolation, Slide, Text } from "@chakra-ui/react";
+import SettingsWindow from "./reader/settings-window/SettingsWindow.tsx";
+import SettingsBar from "./reader/settings-bar/SettingsBar.tsx";
+import { useReaderSettings } from "./reader/states/readerSettings.ts";
+import { useShouldScrollToStart } from "./reader/states/shouldScrollToStart.ts";
 
 function App() {
   let paragraphs = [
     "　そこは一面緑の<ruby>草叢<rt>くさむら</rt></ruby>に覆われた丘陵地帯だった。まだ日は高く、時間的に昼過ぎくらいだろうか。緑の水面を吹き付ける風が撫で、草の波が岩に腰かけた自分へと向かって押し寄せて来る。吹き付ける風には緑の青臭さと、湿った土の薫りが混じり合い鼻孔に届く。そして背後にある森の木々をその風がざわめかせ、駆け抜けていく。",
   ];
 
-  const parentRef: React.RefObject<HTMLDivElement> = createRef();
+  const fontSize = useReaderSettings((state) => state.fontSize);
+  const lineSpacing = useReaderSettings((state) => state.lineSpacing);
+  const vMargins = useReaderSettings((state) => state.vMargins);
+  const fontFamily = useReaderSettings((state) => state.font);
+  const readerMode = useReaderSettings((state) => state.mode);
+  const readerTheme = useReaderSettings((state) => state.theme);
+  const shouldScrollToStart = useShouldScrollToStart(
+    (state) => state.shouldScrollToStart
+  );
+  const toggleScrollRestoration = useShouldScrollToStart(
+    (state) => state.toggleScrollRestoration
+  );
+  const disableScrollRestoration = useShouldScrollToStart(
+    (state) => state.disableScrollRestoration
+  );
 
-  const [readerTheme, setReaderTheme] = useState(themes.light);
   const [sidebarVisibility, setSidebarVisibility] = useState(true);
   const [settingsWindowHidden, setSettingsWindowHidden] = useState(true);
-  const [readerFontSize, setReaderFontSize] = useState("23px");
-  const [readerLineSpacing, setReaderLineSpacing] = useState("200%");
-  const [readerVMargins, setReaderVMargins] = useState("8vh");
-  const [readerFont, setReaderFont] = useState(myoucyouFont);
-  const [readerMode, setReaderMode] = useState(readerModes.Tategumi);
-  const [shouldScrollToStart, setShouldScrollToStart] = useState(true);
+
   const [horizontalStartPos, setHorizontalStartPos] = useState(-1);
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -49,39 +53,13 @@ function App() {
         ? screenOrientation.landscape
         : screenOrientation.portrait;
     if (oldOrientation != newOrientation) {
-      setShouldScrollToStart(true);
+      toggleScrollRestoration();
     }
     setWindowSize({
       width: window.innerWidth,
       height: window.innerHeight,
     });
   };
-
-  const dimScreenFunc = "brightness(0.3)";
-
-  const verticalWR = "body { writing-mode: vertical-rl }";
-  const horizontalWR = "body { writing-mode: horizontal-tb }";
-
-  const isTategumi = readerMode == readerModes.Tategumi;
-  const isYokogumi = readerMode == readerModes.Yokogumi;
-  const writngMode = isMobileSafari
-    ? horizontalWR
-    : isTategumi
-    ? verticalWR
-    : horizontalWR;
-
-  const outerDivWidthBase = isYokogumi ? "100%" : "max-content";
-  const outerDivWidthDesktopSafari = isTategumi ? windowSize.width : "100%";
-  const outerDivWidth =
-    isSafari && !isMobileSafari
-      ? outerDivWidthDesktopSafari
-      : outerDivWidthBase;
-  const outerDivHeight = isYokogumi ? "max-content" : "100%";
-
-  let lastWidthScrollPos = 0;
-  const showSettingsBarThreshold = 1;
-  const hideSettingsBarThreshold = -5;
-  const startAreaThreshold = 18;
 
   const handleScroll = (scrollLeft: number, isReverse: boolean) => {
     if (isMobileSafari) {
@@ -187,7 +165,6 @@ function App() {
 
     if (shouldScrollToStart && isTategumi && isMobileSafari) {
       window.scrollTo(document.body.scrollWidth - window.innerWidth, 0); //scroll to the right (start)
-
       setHorizontalStartPos(window.scrollX); //store new position as initial scroll value
 
       if (scrollWidthScale != -1.0) {
@@ -204,7 +181,6 @@ function App() {
     if (isTategumi) {
       window.addEventListener("wheel", handleWheelScrollWindow);
     }
-
     window.addEventListener("scroll", handleScrollWindow);
 
     return () => {
@@ -215,17 +191,64 @@ function App() {
 
       if ((isMobileSafari || isSafari) && isTategumi) {
         window.removeEventListener("resize", handleResize);
+        disableScrollRestoration();
       }
-      setShouldScrollToStart(false);
     };
   }, [
+    disableScrollRestoration,
     handleResize,
     handleWheelScrollWindow,
     handleScrollWindow,
-    setShouldScrollToStart,
     shouldScrollToStart,
     setHorizontalStartPos,
   ]);
+
+  const settingsVisibility = {
+    isHidden: settingsWindowHidden,
+    setSettingsWindowHidden: setSettingsWindowHidden,
+  };
+  const scrollBarWebKitCss = {
+    "&::-webkit-scrollbar": {
+      position: "relative",
+      display: "block",
+      height: "6px",
+      width: "1px",
+    },
+    "&::-webkit-scrollbar-track": {
+      background: "#333333",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      background: "#B0AEAE",
+      borderRadius: "0px",
+    },
+  } as Interpolation<{}>;
+
+  const dimScreenFunc = "brightness(0.3)";
+
+  const isTategumi = readerMode == readerModes.Tategumi;
+  const isYokogumi = readerMode == readerModes.Yokogumi;
+
+  const verticalWR = "body { writing-mode: vertical-rl }";
+  const horizontalWR = "body { writing-mode: horizontal-tb }";
+  const writngMode = isMobileSafari
+    ? horizontalWR
+    : isTategumi
+    ? verticalWR
+    : horizontalWR;
+
+  const outerDivWidthBase = isYokogumi ? "100%" : "max-content";
+  const outerDivWidthDesktopSafari = isTategumi ? windowSize.width : "100%";
+
+  const outerDivWidth =
+    isSafari && !isMobileSafari
+      ? outerDivWidthDesktopSafari
+      : outerDivWidthBase;
+  const outerDivHeight = isYokogumi ? "max-content" : "100%";
+
+  let lastWidthScrollPos = 0;
+  const showSettingsBarThreshold = 1;
+  const hideSettingsBarThreshold = -5;
+  const startAreaThreshold = 18;
 
   return (
     <>
@@ -250,19 +273,7 @@ function App() {
         }}
       />
 
-      <SettingsWindow
-        isHidden={settingsWindowHidden}
-        setReaderFontSize={setReaderFontSize}
-        setReaderLineSpacing={setReaderLineSpacing}
-        setReaderVMargins={setReaderVMargins}
-        setReaderFont={setReaderFont}
-        setSettingsWindowHidden={setSettingsWindowHidden}
-        setReaderTheme={setReaderTheme}
-        readerTheme={readerTheme}
-        setReaderMode={setReaderMode}
-        readerMode={readerMode}
-        setShouldScrollToStart={setShouldScrollToStart}
-      ></SettingsWindow>
+      <SettingsWindow visibility={settingsVisibility}></SettingsWindow>
 
       <Slide
         in={sidebarVisibility}
@@ -280,53 +291,38 @@ function App() {
           settingsWindowHidden={settingsWindowHidden}
           setSettingsWindowHidden={setSettingsWindowHidden}
           readerTheme={readerTheme}
-          readerMode={readerMode}
         ></SettingsBar>
       </Slide>
 
-      <Box //outer main div
-        display={"flex"}
+      <Flex //outer main div
         flexDir={"row"}
         justifyContent={"center"}
+        alignItems={"center"}
         position={"relative"}
         width={outerDivWidth}
         height={outerDivHeight}
-        alignItems={"center"}
-        lineHeight={readerLineSpacing}
-        fontFamily={readerFont}
-        fontSize={readerFontSize}
-        textColor={readerTheme.mainTextColor}
+        minWidth={isTategumi ? windowSize.width : "unset"}
+        minHeight={isYokogumi ? windowSize.height : "unset"}
         bgColor={readerTheme.mainBgColor}
+        textColor={readerTheme.mainTextColor}
+        fontFamily={fontFamily}
+        fontSize={fontSize}
+        lineHeight={lineSpacing}
         overflowY={isTategumi ? "hidden" : "auto"}
         overflowX={isYokogumi ? "hidden" : "auto"}
-        zIndex={1}
+        pt={isTategumi ? vMargins : "60px"}
+        pb={isTategumi ? vMargins : "unset"}
+        pr={isTategumi ? "60px" : "4%"}
+        pl={isTategumi ? "undet" : "4%"}
         filter={settingsWindowHidden ? "unset" : dimScreenFunc}
         onClick={handleCloseSettingsOnClick}
         onWheel={isSafari && !isMobileSafari ? handleWheelScrollDiv : () => {}}
         onScroll={isSafari && !isMobileSafari ? handleScrollDiv : () => {}}
-        ref={parentRef as React.RefObject<HTMLDivElement>}
+        zIndex={1}
         sx={{
           writingMode: isMobileSafari && isTategumi ? "vertical-rl" : "inherit",
         }}
-        css={{
-          "&::-webkit-scrollbar": {
-            position: "relative",
-            display: "block",
-            height: "6px",
-            width: "1px",
-          },
-          "&::-webkit-scrollbar-track": {
-            background: "#333333",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            background: "#B0AEAE",
-            borderRadius: "0px",
-          },
-        }}
-        pt={isTategumi ? readerVMargins : "60px"}
-        pb={isTategumi ? readerVMargins : "unset"}
-        pr={isTategumi ? "60px" : "4%"}
-        pl={isTategumi ? "undet" : "4%"}
+        css={scrollBarWebKitCss}
       >
         <Box //inner main div
           m={"auto"}
@@ -341,11 +337,16 @@ function App() {
         >
           {paragraphs.map((object, i) => {
             return (
-              <ChapterText full_chapter_text={object} key={i}></ChapterText>
+              <Text
+                dangerouslySetInnerHTML={{
+                  __html: object,
+                }}
+                key={i}
+              ></Text>
             );
           })}
         </Box>
-      </Box>
+      </Flex>
     </>
   );
 }

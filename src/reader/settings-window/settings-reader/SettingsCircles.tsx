@@ -5,7 +5,7 @@ interface FontSizeCirclesProps {
   selectedSize: number;
 }
 
-const FontSizeCircles: React.FC<FontSizeCirclesProps> = ({
+const SettingsCircles: React.FC<FontSizeCirclesProps> = ({
   numberOfSizes,
   selectedSize,
 }) => {
@@ -28,4 +28,4 @@ const FontSizeCircles: React.FC<FontSizeCirclesProps> = ({
   return resultArr;
 };
 
-export default FontSizeCircles;
+export default SettingsCircles;

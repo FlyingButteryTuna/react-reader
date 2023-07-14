@@ -96,14 +96,13 @@ export const themes = {
   sepia: sepia,
   blue: blue,
 };
+export const defaultTheme = themes.light;
 
-export const myoucyouFont =
-  '"游明朝", YuMincho, "Hiragino Mincho ProN W3", "ヒラギノ明朝 ProN W3", "Hiragino Mincho ProN", "HG明朝E", "ＭＳ Ｐ明朝", "ＭＳ 明朝", serif;';
-
-export const gothicFont =
-  '"Hiragino Sans W3", "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif';
-
-export const enum readerModes {
-  Tategumi = 1,
-  Yokogumi,
-}
+export const getTheme = (themeName: string): ReaderTheme => {
+  {
+    let result = Object.entries(themes).find(
+      (element) => element[1].themeName === themeName
+    );
+    return result ? result[1] : defaultTheme;
+  }
+};

@@ -9,22 +9,21 @@ import {
 } from "@chakra-ui/react";
 import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import SettingsIconVertical from "./SettingsIconVertical.tsx";
-import { ReaderTheme } from "./ReaderThemes.ts";
+import { ReaderTheme } from "../settings-consts/readerThemes.ts";
 import { isMobileSafari, isSafari } from "react-device-detect";
-import { readerModes } from "./ReaderThemes.ts";
+import { readerModes } from "../settings-consts/readerSettings.ts";
+import { useReaderSettings } from "../states/readerSettings.ts";
 
 interface SettingsBarVerticalProps {
   settingsWindowHidden: boolean;
   setSettingsWindowHidden: React.Dispatch<React.SetStateAction<boolean>>;
   readerTheme: ReaderTheme;
-  readerMode: readerModes;
 }
 
 const SettingsBar: React.FC<SettingsBarVerticalProps> = ({
   setSettingsWindowHidden,
   settingsWindowHidden,
   readerTheme,
-  readerMode,
 }) => {
   const handleSettingIconClick = () => {
     setSettingsWindowHidden(!settingsWindowHidden);
@@ -38,6 +37,8 @@ const SettingsBar: React.FC<SettingsBarVerticalProps> = ({
     }
   };
 
+  const readerMode = useReaderSettings((state) => state.mode);
+
   const isTategumi = readerMode == readerModes.Tategumi;
   const isYokogumi = readerMode == readerModes.Yokogumi;
   const writingMode = isTategumi ? "vertical-rl" : "horizontal-tb";
@@ -45,7 +46,7 @@ const SettingsBar: React.FC<SettingsBarVerticalProps> = ({
   const iconWrapperProps = {
     minWidth: "50px",
     minHeight: "50px",
-    sx: { ...{ _hover: { color: readerTheme.settingsBarHoverColor } } },
+    sx: { _hover: { color: readerTheme.settingsBarHoverColor } },
     cursor: "pointer",
     alignItems: "center",
   };
@@ -58,7 +59,7 @@ const SettingsBar: React.FC<SettingsBarVerticalProps> = ({
       : ("bottom" as PlacementWithLogical),
     backgroundColor: readerTheme.toolTipStyle.bgColor,
     textColor: readerTheme.toolTipStyle.textColor,
-    sx: { ...{ writingMode: writingMode } },
+    sx: { writingMode: writingMode },
     marginRight: isSafari && isTategumi ? "20px" : "unset",
   };
 

@@ -1,66 +1,55 @@
 import { Box, Button, Text, useMediaQuery } from "@chakra-ui/react";
-import { useState } from "react";
-import IncDecSettings from "./IncDecSettings";
-import ReaderThemesSettings from "./ThemesSettings";
+import IncDecSettings from "./settings-reader/IncDecSettings.tsx";
+import ReaderThemesSettings from "./settings-reader/ThemesSettings.tsx";
 import {
-  ReaderTheme,
+  readerModes,
+  fontSizes,
+  lineSpaces,
+  vMargins,
   myoucyouFont,
   gothicFont,
-  readerModes,
-} from "./ReaderThemes.ts";
-import ChoiceSettings from "./ChoiceSettings.tsx";
+} from "../settings-consts/readerSettings.ts";
+import ChoiceSettings from "./settings-reader/ChoiceSettings.tsx";
+import { useReaderSettings } from "../states/readerSettings.ts";
+import { isMobileSafari } from "react-device-detect";
 
 interface SettingsWindowProps {
-  isHidden: boolean;
-  setReaderFontSize: React.Dispatch<React.SetStateAction<string>>;
-  setReaderLineSpacing: React.Dispatch<React.SetStateAction<string>>;
-  setReaderVMargins: React.Dispatch<React.SetStateAction<string>>;
-  setReaderFont: React.Dispatch<React.SetStateAction<string>>;
-  setSettingsWindowHidden: React.Dispatch<React.SetStateAction<boolean>>;
-  setReaderTheme: React.Dispatch<React.SetStateAction<ReaderTheme>>;
-  setReaderMode: React.Dispatch<React.SetStateAction<readerModes>>;
-  setShouldScrollToStart: React.Dispatch<React.SetStateAction<boolean>>;
-  readerMode: readerModes;
-  readerTheme: ReaderTheme;
+  visibility: {
+    isHidden: boolean;
+    setSettingsWindowHidden: React.Dispatch<React.SetStateAction<boolean>>;
+  };
 }
 
-const SettingsWindow: React.FC<SettingsWindowProps> = ({
-  isHidden,
-  setReaderFontSize,
-  setReaderLineSpacing,
-  setReaderVMargins,
-  setReaderFont,
-  setSettingsWindowHidden,
-  setReaderTheme,
-  setReaderMode,
-  readerMode,
-  readerTheme,
-  setShouldScrollToStart,
-}) => {
+const SettingsWindow: React.FC<SettingsWindowProps> = ({ visibility }) => {
   const [isLargerThan640] = useMediaQuery("(min-width: 640px)");
 
-  const numberOfSizes = 7;
-
-  const [selectedFontSize, setSelectedFontSize] = useState(6);
-  const fontSizes = ["13px", "15px", "16px", "17px", "20px", "23px", "26px"];
-
-  const [selectedLineSpacing, setSelectedLineSpacing] = useState(6);
-  const lineSpaces = ["125%", "140%", "155%", "170%", "185%", "200%", "215%"];
-
-  const [selectedVMargins, setSelectedVMargins] = useState(4);
-  const vMargins = ["1vh", "3vh", "6vh", "8vh", "10vh", "13vh", "16vh"];
-
-  const [selectedFont, setSelectedFont] = useState(1);
-  const fonts = [myoucyouFont, gothicFont];
-
-  const [selectedReaderMode, setSelectedReaderMode] = useState(
-    readerModes.Tategumi
+  const selectedFontSize = useReaderSettings(
+    (state) => fontSizes.indexOf(state.fontSize) + 1
   );
-  const readerModesArr = [readerModes.Tategumi, readerModes.Yokogumi];
+
+  const selectedLineSpacing = useReaderSettings(
+    (state) => lineSpaces.indexOf(state.lineSpacing) + 1
+  );
+
+  const selectedVMargins = useReaderSettings(
+    (state) => vMargins.indexOf(state.vMargins) + 1
+  );
+
+  const readerMode = useReaderSettings((state) => state.mode);
+  const readerTheme = useReaderSettings((state) => state.theme);
+
+  const fontSettings = [
+    { settingValue: myoucyouFont, settingName: "明朝" },
+    { settingValue: gothicFont, settingName: "ゴシック" },
+  ];
+
+  const modeSettings = [
+    { settingValue: readerModes.Tategumi.toString(), settingName: "縦組み" },
+    { settingValue: readerModes.Yokogumi.toString(), settingName: "横組み" },
+  ];
 
   const handleStopPropagation = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
-    event.preventDefault();
   };
 
   const disableDoubleClickSelection = (
@@ -75,17 +64,18 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.stopPropagation();
-    if (!isHidden) {
-      setSettingsWindowHidden(!isHidden);
+    if (!visibility.isHidden) {
+      visibility.setSettingsWindowHidden(!visibility.isHidden);
     }
   };
 
   return (
     <Box
+      zIndex={3}
       bgColor={"black"}
       position={"fixed"}
       display={"flex"}
-      hidden={isHidden}
+      hidden={visibility.isHidden}
       maxWidth={"270px"}
       maxHeight={"500px"}
       bottom={0}
@@ -96,7 +86,6 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
       columnGap={2}
       rounded={"10px"}
       textColor={"white"}
-      zIndex={3}
       flexDir={"row-reverse"}
       minWidth={"249px"}
       border={"2px"}
@@ -163,65 +152,54 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({
         overflow={"auto"}
       >
         <IncDecSettings
-          setSetting={setReaderFontSize}
-          setSelected={setSelectedFontSize}
-          numberOfSizes={numberOfSizes}
           selectedSetting={selectedFontSize}
           settingsArray={fontSizes}
           settingHeader={"文字サイズ"}
           forceRepaint={true}
           lockSetting={false}
+          increaseFunc={useReaderSettings((state) => state.increaseFontSize)}
+          decreaseFunc={useReaderSettings((state) => state.decreaseFontSize)}
         ></IncDecSettings>
 
         <IncDecSettings
-          setSetting={setReaderLineSpacing}
-          setSelected={setSelectedLineSpacing}
-          numberOfSizes={numberOfSizes}
           selectedSetting={selectedLineSpacing}
           settingsArray={lineSpaces}
           settingHeader={"行間サイズ"}
           forceRepaint={true}
           lockSetting={false}
+          increaseFunc={useReaderSettings((state) => state.increaseLineSpacing)}
+          decreaseFunc={useReaderSettings((state) => state.decreaseLineSpacing)}
         ></IncDecSettings>
 
         <IncDecSettings
-          setSetting={setReaderVMargins}
-          setSelected={setSelectedVMargins}
-          numberOfSizes={numberOfSizes}
           selectedSetting={selectedVMargins}
           settingsArray={vMargins}
           settingHeader={"余白サイズ"}
           forceRepaint={true}
           lockSetting={readerMode == readerModes.Tategumi ? false : true}
+          increaseFunc={useReaderSettings((state) => state.increaseVMargins)}
+          decreaseFunc={useReaderSettings((state) => state.decreaseVmargins)}
         ></IncDecSettings>
 
         <ChoiceSettings
           settingHeader={"フォント"}
-          settingOneName={"明朝"}
-          settingTwoName={"ゴシック"}
-          setSetting={setReaderFont}
-          selectedSetting={selectedFont}
-          setSelectedSetting={setSelectedFont}
-          settingsArray={fonts}
-          shouldScrollToStart={false}
-          setShouldScrollToStart={undefined}
+          settings={fontSettings}
+          setSetting={useReaderSettings((state) => state.setFontStyle)}
+          defaultValue={useReaderSettings((state) => state.font)}
+          shouldToggleScrollRestoration={false}
         ></ChoiceSettings>
 
         <ChoiceSettings
           settingHeader={"組み方向"}
-          settingOneName={"縦組み"}
-          settingTwoName={"横組み"}
-          setSetting={setReaderMode}
-          selectedSetting={selectedReaderMode}
-          setSelectedSetting={setSelectedReaderMode}
-          settingsArray={readerModesArr}
-          shouldScrollToStart={true}
-          setShouldScrollToStart={setShouldScrollToStart}
+          settings={modeSettings}
+          setSetting={useReaderSettings((state) => state.setMode)}
+          defaultValue={readerMode.toString()}
+          shouldToggleScrollRestoration={isMobileSafari ? true : false}
         ></ChoiceSettings>
       </Box>
 
       <ReaderThemesSettings
-        setReaderTheme={setReaderTheme}
+        setReaderTheme={useReaderSettings((state) => state.setTheme)}
         readerTheme={readerTheme}
       ></ReaderThemesSettings>
     </Box>
