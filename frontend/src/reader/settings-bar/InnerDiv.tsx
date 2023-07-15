@@ -1,7 +1,7 @@
 import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { useReaderSettings } from "../states/readerSettings.ts";
 import { Divider, Flex } from "@chakra-ui/react";
-import SettingsIconVertical from "./SettingsIconVertical";
+import SettingsIconVertical from "./SettingsIconVertical.tsx";
 import SettingsBarTooltip from "./SettingsBarTooltip.tsx";
 import ChapterBreadcrumb from "./ChapterBreadcrumb.tsx";
 import { useWindowVisibility } from "../states/miscReaderStates.ts";
