@@ -1,8 +1,9 @@
 export const myoucyouFont =
   '"游明朝", YuMincho, "Hiragino Mincho ProN W3", "ヒラギノ明朝 ProN W3", "Hiragino Mincho ProN", "HG明朝E", "ＭＳ Ｐ明朝", "ＭＳ 明朝", serif;';
-
 export const gothicFont =
   '"Hiragino Sans W3", "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif';
+export const defaultValueFont = 1;
+export const fonts = [myoucyouFont, gothicFont];
 
 export const enum readerModes {
   Tategumi = 1,
@@ -34,9 +35,6 @@ export const lineSpaces = [
 
 export const defaultValueVMargin = 4;
 export const vMargins = ["1vh", "3vh", "6vh", "8vh", "10vh", "13vh", "16vh"];
-
-export const defaultValueFont = 1;
-export const fonts = [myoucyouFont, gothicFont];
 
 export const getNext = <T>(array: Array<T>, current: T): T => {
   let currentIndex = array.indexOf(current);

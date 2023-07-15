@@ -5,7 +5,10 @@ import { Box, Flex, Interpolation, Slide, Text } from "@chakra-ui/react";
 import SettingsWindow from "./reader/settings-window/SettingsWindow.tsx";
 import SettingsBar from "./reader/settings-bar/SettingsBar.tsx";
 import { useReaderSettings } from "./reader/states/readerSettings.ts";
-import { useShouldScrollToStart } from "./reader/states/shouldScrollToStart.ts";
+import {
+  useShouldScrollToStart,
+  useWindowVisibility,
+} from "./reader/states/miscReaderStates.ts";
 
 function App() {
   let paragraphs = [
@@ -27,9 +30,12 @@ function App() {
   const disableScrollRestoration = useShouldScrollToStart(
     (state) => state.disableScrollRestoration
   );
+  const isWindowHidden = useWindowVisibility((state) => state.isWindowHidden);
+  const toggleWindowVisibility = useWindowVisibility(
+    (state) => state.toggleWindowVisibility
+  );
 
   const [sidebarVisibility, setSidebarVisibility] = useState(true);
-  const [settingsWindowHidden, setSettingsWindowHidden] = useState(true);
 
   const [horizontalStartPos, setHorizontalStartPos] = useState(-1);
   const [windowSize, setWindowSize] = useState({
@@ -95,7 +101,7 @@ function App() {
     scrollLeft: number,
     scrollTop: number
   ) => {
-    if (event.deltaY != 0 && settingsWindowHidden) {
+    if (event.deltaY != 0 && isWindowHidden) {
       let x: number;
       let y: number;
       if (isSafari || isFirefox) {
@@ -146,8 +152,8 @@ function App() {
   };
 
   const handleCloseSettingsOnClick = () => {
-    if (!settingsWindowHidden) {
-      setSettingsWindowHidden(!settingsWindowHidden);
+    if (!isWindowHidden) {
+      toggleWindowVisibility();
     }
   };
 
@@ -203,10 +209,6 @@ function App() {
     setHorizontalStartPos,
   ]);
 
-  const settingsVisibility = {
-    isHidden: settingsWindowHidden,
-    setSettingsWindowHidden: setSettingsWindowHidden,
-  };
   const scrollBarWebKitCss = {
     "&::-webkit-scrollbar": {
       position: "relative",
@@ -273,7 +275,7 @@ function App() {
         }}
       />
 
-      <SettingsWindow visibility={settingsVisibility}></SettingsWindow>
+      <SettingsWindow></SettingsWindow>
 
       <Slide
         in={sidebarVisibility}
@@ -283,15 +285,11 @@ function App() {
           maxWidth: isTategumi ? "50px" : "unset",
           maxHeight: isYokogumi ? "50px" : "unset",
           zIndex: 2,
-          filter: settingsWindowHidden ? "unset" : dimScreenFunc,
+          filter: isWindowHidden ? "unset" : dimScreenFunc,
         }}
         direction={isTategumi ? "right" : "top"}
       >
-        <SettingsBar
-          settingsWindowHidden={settingsWindowHidden}
-          setSettingsWindowHidden={setSettingsWindowHidden}
-          readerTheme={readerTheme}
-        ></SettingsBar>
+        <SettingsBar isVertical={isTategumi ? true : false}></SettingsBar>
       </Slide>
 
       <Flex //outer main div
@@ -314,7 +312,7 @@ function App() {
         pb={isTategumi ? vMargins : "unset"}
         pr={isTategumi ? "60px" : "4%"}
         pl={isTategumi ? "undet" : "4%"}
-        filter={settingsWindowHidden ? "unset" : dimScreenFunc}
+        filter={isWindowHidden ? "unset" : dimScreenFunc}
         onClick={handleCloseSettingsOnClick}
         onWheel={isSafari && !isMobileSafari ? handleWheelScrollDiv : () => {}}
         onScroll={isSafari && !isMobileSafari ? handleScrollDiv : () => {}}
@@ -332,8 +330,8 @@ function App() {
           height={"fit-content"}
           textColor={"inherit"}
           bgColor={"inherit"}
-          userSelect={settingsWindowHidden ? "auto" : "none"}
-          cursor={settingsWindowHidden ? "auto" : "default"}
+          userSelect={isWindowHidden ? "auto" : "none"}
+          cursor={isWindowHidden ? "auto" : "default"}
         >
           {paragraphs.map((object, i) => {
             return (

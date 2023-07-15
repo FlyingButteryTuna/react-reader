@@ -14,3 +14,18 @@ export const useShouldScrollToStart = create<ShouldScrollToStart>((set) => ({
   disableScrollRestoration: () => set(() => ({ shouldScrollToStart: false })),
   enableScrollRestoration: () => set(() => ({ shouldScrollToStart: true })),
 }));
+
+interface WindowVisibility {
+  isWindowHidden: boolean;
+  toggleWindowVisibility: () => void;
+  disableWindowVisibility: () => void;
+  enableWindowVisibility: () => void;
+}
+
+export const useWindowVisibility = create<WindowVisibility>((set) => ({
+  isWindowHidden: true,
+  toggleWindowVisibility: () =>
+    set((state) => ({ isWindowHidden: !state.isWindowHidden })),
+  disableWindowVisibility: () => set(() => ({ isWindowHidden: false })),
+  enableWindowVisibility: () => set(() => ({ isWindowHidden: true })),
+}));

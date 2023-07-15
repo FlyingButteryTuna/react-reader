@@ -12,29 +12,24 @@ import {
 import ChoiceSettings from "./settings-reader/ChoiceSettings.tsx";
 import { useReaderSettings } from "../states/readerSettings.ts";
 import { isMobileSafari } from "react-device-detect";
+import { useWindowVisibility } from "../states/miscReaderStates.ts";
 
-interface SettingsWindowProps {
-  visibility: {
-    isHidden: boolean;
-    setSettingsWindowHidden: React.Dispatch<React.SetStateAction<boolean>>;
-  };
-}
-
-const SettingsWindow: React.FC<SettingsWindowProps> = ({ visibility }) => {
+const SettingsWindow = () => {
+  const isWindowHidden = useWindowVisibility((state) => state.isWindowHidden);
+  const toggleWindowVisibility = useWindowVisibility(
+    (state) => state.toggleWindowVisibility
+  );
   const [isLargerThan640] = useMediaQuery("(min-width: 640px)");
 
   const selectedFontSize = useReaderSettings(
     (state) => fontSizes.indexOf(state.fontSize) + 1
   );
-
   const selectedLineSpacing = useReaderSettings(
     (state) => lineSpaces.indexOf(state.lineSpacing) + 1
   );
-
   const selectedVMargins = useReaderSettings(
     (state) => vMargins.indexOf(state.vMargins) + 1
   );
-
   const readerMode = useReaderSettings((state) => state.mode);
   const readerTheme = useReaderSettings((state) => state.theme);
 
@@ -42,7 +37,6 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({ visibility }) => {
     { settingValue: myoucyouFont, settingName: "明朝" },
     { settingValue: gothicFont, settingName: "ゴシック" },
   ];
-
   const modeSettings = [
     { settingValue: readerModes.Tategumi.toString(), settingName: "縦組み" },
     { settingValue: readerModes.Yokogumi.toString(), settingName: "横組み" },
@@ -60,22 +54,13 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({ visibility }) => {
     }
   };
 
-  const handleCloseSettingsOnClick = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.stopPropagation();
-    if (!visibility.isHidden) {
-      visibility.setSettingsWindowHidden(!visibility.isHidden);
-    }
-  };
-
   return (
     <Box
       zIndex={3}
       bgColor={"black"}
       position={"fixed"}
       display={"flex"}
-      hidden={visibility.isHidden}
+      hidden={isWindowHidden}
       maxWidth={"270px"}
       maxHeight={"500px"}
       bottom={0}
@@ -124,7 +109,7 @@ const SettingsWindow: React.FC<SettingsWindowProps> = ({ visibility }) => {
           rounded={"base"}
           variant={"solid"}
           px={"0px"}
-          onClick={handleCloseSettingsOnClick}
+          onClick={toggleWindowVisibility}
         >
           <Text
             lineHeight={"short"}

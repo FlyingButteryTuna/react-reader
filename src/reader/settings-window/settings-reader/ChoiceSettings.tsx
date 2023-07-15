@@ -1,7 +1,7 @@
 import { Flex, useRadioGroup } from "@chakra-ui/react";
 import SettingsElement from "./SettingsElement";
 import SettingsRadio from "./SettingsRadio";
-import { useShouldScrollToStart } from "../../states/shouldScrollToStart";
+import { useShouldScrollToStart } from "../../states/miscReaderStates";
 
 interface ChoiceSettingsProps {
   settingHeader: string;
