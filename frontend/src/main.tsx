@@ -17,6 +17,13 @@ const ruby = {
       standup: {
         textOrientation: "upright",
       },
+      body: {
+        WebkitTextSizeAdjust: "none",
+        WebkitFontSmoothing: "antialiased",
+      },
+      html: {
+        WebkitTextSizeAdjust: "none",
+      },
     },
   },
 };

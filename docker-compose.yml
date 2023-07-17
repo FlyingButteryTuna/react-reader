@@ -1,0 +1,25 @@
+version: '3.1'
+
+services:
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_HOST: localhost
+      REDIS_PASSWORD: session
+  db:
+    image: "postgres:15.3-alpine"
+    restart: "always"
+    environment:
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:
+    driver: local
