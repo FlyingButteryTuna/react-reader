@@ -1,11 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
 
 import { ChakraProvider } from "@chakra-ui/react";
 import { extendTheme } from "@chakra-ui/react";
+import "././fonts.css";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes.tsx";
 
-const ruby = {
+const theme = extendTheme({
   styles: {
     global: {
       rtboten: {
@@ -18,6 +20,7 @@ const ruby = {
         textOrientation: "upright",
       },
       body: {
+        fontFamily: "Noto Sans Japanese",
         WebkitTextSizeAdjust: "none",
         WebkitFontSmoothing: "antialiased",
       },
@@ -26,14 +29,12 @@ const ruby = {
       },
     },
   },
-};
-
-const theme = extendTheme(ruby);
+});
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <App />
+      <RouterProvider router={router} />
     </ChakraProvider>
   </React.StrictMode>
 );
