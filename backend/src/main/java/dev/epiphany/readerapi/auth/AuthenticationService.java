@@ -33,8 +33,6 @@ public class AuthenticationService {
     public AuthenticationResponse register(RegisterRequest requestBody, HttpServletRequest request,
                                            HttpServletResponse response) {
         var user = User.builder()
-                .firstname(requestBody.getFirstname())
-                .lastname(requestBody.getLastname())
                 .email(requestBody.getEmail())
                 .password(passwordEncoder.encode(requestBody.getPassword()))
                 .role(Role.USER)
