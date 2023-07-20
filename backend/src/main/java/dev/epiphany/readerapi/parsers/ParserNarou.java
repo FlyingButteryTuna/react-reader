@@ -20,11 +20,11 @@ import java.util.regex.Pattern;
 @NoArgsConstructor
 @Service
 public class ParserNarou implements Parser {
-    final private String baseLink = "https://ncode.syosetu.com/";
+    final private String baseLink = "https://ncode.syosetu.com";
 
     @Override
-    public String parseChapterText(String path) throws IOException {
-        String chapterPathRegex = "n\\d{4}[A-Za-z]{2}(?:/\\d+)?/";
+    public ObjectNode parseChapterText(String path) throws IOException {
+        String chapterPathRegex = "/n\\d{4}[A-Za-z]{2}(?:/\\d+)?/";
         Pattern pattern = Pattern.compile(chapterPathRegex);
         Matcher matcher = pattern.matcher(path);
         if (!matcher.matches()){
@@ -51,12 +51,12 @@ public class ParserNarou implements Parser {
             chapterBody.add(paragraph.html());
         }
         rootNode.set("chapter_body", chapterBody);
-        return rootNode.toString();
+        return rootNode;
     }
 
     @Override
-    public String parseChapterList(String path) {
-        String seriesPathRegex = "n\\d{4}[A-Za-z]{2}/";
+    public ObjectNode parseChapterList(String path) {
+        String seriesPathRegex = "/n\\d{4}[A-Za-z]{2}/";
         Pattern pattern = Pattern.compile(seriesPathRegex);
         Matcher matcher = pattern.matcher(path);
         if (!matcher.matches()){
@@ -90,9 +90,11 @@ public class ParserNarou implements Parser {
                         "Could not fetch data from given path. Invalid HTML.").get(0).children();
 
         for (Element el : content) {
-
             if (el.className().equals(chapterTitleClassName)){
                 if (!chapterIndex.isEmpty()){
+                    if (chapterIndexRoot.isEmpty()){
+                        chapterIndexRoot.put("chapter_title", "");
+                    }
                     chapterIndexRoot.set("subchapter_list", chapterIndex);
                     seriesIndex.add(chapterIndexRoot);
                     chapterIndex = objectMapper.createArrayNode();
@@ -109,7 +111,18 @@ public class ParserNarou implements Parser {
                 chapterIndex.add(chapter);
             }
         }
+        if (chapterIndexRoot.isEmpty()){
+            chapterIndexRoot.put("chapter_title", "");
+        }
+        chapterIndexRoot.set("subchapter_list", chapterIndex);
+        seriesIndex.add(chapterIndexRoot);
+
+        String title = Objects.requireNonNull(doc.getElementsByClass("novel_title"),
+                "Could not fetch data from given path. Invalid HTML.").get(0).text();
+
+        rootNode.put("series_title", title);
+        rootNode.put("series_path", path);
         rootNode.set("chapter_index", seriesIndex);
-        return rootNode.toString();
+        return rootNode;
     }
 }

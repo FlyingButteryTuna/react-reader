@@ -18,6 +18,9 @@ import org.springframework.security.web.authentication.session.ConcurrentSession
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -36,6 +39,7 @@ public class AuthenticationService {
                 .email(requestBody.getEmail())
                 .password(passwordEncoder.encode(requestBody.getPassword()))
                 .role(Role.USER)
+                .novels(new HashSet<>())
                 .build();
         var savedUser = repository.save(user);
         return AuthenticationResponse.builder()
@@ -51,10 +55,7 @@ public class AuthenticationService {
                         requestBody.getPassword()
                 )
         );
-        System.out.println(sessionRegistry.getAllSessions(auth.getPrincipal(), false).size());
-        System.out.println("login");
         sessionControlAuthenticationStrategy.onAuthentication(auth, request, response);
-        System.out.println("login1");
         var user = repository.findByEmail(requestBody.getEmail()).orElseThrow();
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();

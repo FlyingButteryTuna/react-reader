@@ -1,10 +1,11 @@
 package dev.epiphany.readerapi.parsers;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 public interface Parser {
-    public String parseChapterText(String path) throws IOException;
-    public String parseChapterList(String path);
+    public ObjectNode parseChapterText(String path) throws IOException;
+    public ObjectNode parseChapterList(String path);
 }
