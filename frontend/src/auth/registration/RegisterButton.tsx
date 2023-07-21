@@ -45,7 +45,7 @@ const RegisterButton: React.FC<RegisterButtonProps> = ({
     };
 
     axios
-      .post("http://localhost:8080/api/v1/auth/register", data)
+      .post("/api/v1/auth/register", data)
       .then(() => {
         navigate("/signin");
       })

@@ -56,6 +56,7 @@ public class ParserNarou implements Parser {
 
     @Override
     public ObjectNode parseChapterList(String path) {
+        System.out.println(path);
         String seriesPathRegex = "/n\\d{4}[A-Za-z]{2}/";
         Pattern pattern = Pattern.compile(seriesPathRegex);
         Matcher matcher = pattern.matcher(path);
@@ -120,8 +121,14 @@ public class ParserNarou implements Parser {
         String title = Objects.requireNonNull(doc.getElementsByClass("novel_title"),
                 "Could not fetch data from given path. Invalid HTML.").get(0).text();
 
+        String description = Objects.requireNonNull(doc.getElementById("novel_ex"),
+                "Could not fetch data from given path. Invalid HTML.").wholeText();
+
+        description = description.replaceAll("\\n\\n", "\n");
+
         rootNode.put("series_title", title);
         rootNode.put("series_path", path);
+        rootNode.put("series_description", description);
         rootNode.set("chapter_index", seriesIndex);
         return rootNode;
     }

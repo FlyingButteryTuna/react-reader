@@ -6,6 +6,8 @@ import { extendTheme } from "@chakra-ui/react";
 import "././fonts.css";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes.tsx";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import axios from "axios";
 
 const theme = extendTheme({
   styles: {
@@ -31,10 +33,16 @@ const theme = extendTheme({
   },
 });
 
+const queryClient = new QueryClient();
+
+axios.defaults.baseURL = "http://192.168.0.101:8080";
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
     </ChakraProvider>
   </React.StrictMode>
 );

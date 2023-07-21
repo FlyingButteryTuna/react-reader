@@ -4,10 +4,7 @@ import dev.epiphany.readerapi.parsers.ParserNarou;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -24,7 +21,7 @@ public class DemoController {
     }
 
     @GetMapping("/test1")
-    public ResponseEntity<String> test1(@RequestBody ChapterBodyRequest request) {
+    public ResponseEntity<String> test1(ChapterBodyRequest request) {
         return ResponseEntity.ok(parserNarou.parseChapterList(request.getPath()).toString());
     }
 
