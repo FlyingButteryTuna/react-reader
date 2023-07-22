@@ -29,3 +29,19 @@ export const useWindowVisibility = create<WindowVisibility>((set) => ({
   disableWindowVisibility: () => set(() => ({ isWindowHidden: false })),
   enableWindowVisibility: () => set(() => ({ isWindowHidden: true })),
 }));
+
+interface BreadCrumbs {
+  seriesTitle: string;
+  chapterTitle: string;
+  setSeriesTitle: (seriesTitle: string) => void;
+  setChapterTitle: (chapterTitle: string) => void;
+}
+
+export const useBreadCrumbs = create<BreadCrumbs>((set) => ({
+  seriesTitle: "",
+  chapterTitle: "",
+  setSeriesTitle: (seriesTitle: string) =>
+    set(() => ({ seriesTitle: seriesTitle })),
+  setChapterTitle: (chapterTitle: string) =>
+    set(() => ({ chapterTitle: chapterTitle })),
+}));

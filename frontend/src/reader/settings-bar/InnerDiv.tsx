@@ -4,7 +4,10 @@ import { Divider, Flex } from "@chakra-ui/react";
 import SettingsIconVertical from "./SettingsIconVertical.tsx";
 import SettingsBarTooltip from "./SettingsBarTooltip.tsx";
 import ChapterBreadcrumb from "./ChapterBreadcrumb.tsx";
-import { useWindowVisibility } from "../states/miscReaderStates.ts";
+import {
+  useBreadCrumbs,
+  useWindowVisibility,
+} from "../states/miscReaderStates.ts";
 
 const InnerDiv = (props: { isVertical: boolean }) => {
   const readerTheme = useReaderSettings((state) => state.theme);
@@ -35,8 +38,8 @@ const InnerDiv = (props: { isVertical: boolean }) => {
       ></Divider>
 
       <ChapterBreadcrumb
-        seriesTitle="シリーズのタイトル"
-        chapterTitle="この話のタイトル"
+        seriesTitle={useBreadCrumbs((state) => state.seriesTitle)}
+        chapterTitle={useBreadCrumbs((state) => state.chapterTitle)}
       ></ChapterBreadcrumb>
 
       <Flex

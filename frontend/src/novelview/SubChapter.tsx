@@ -5,21 +5,27 @@ import {
   Menu,
   MenuList,
   MenuItem,
-  Heading,
   Text,
-  Box,
-  Button,
   useMediaQuery,
+  Link,
 } from "@chakra-ui/react";
 import { isMobile } from "react-device-detect";
 import { GoKebabHorizontal } from "react-icons/go";
+import { createSearchParams } from "react-router-dom";
 
 interface SubChapterProps {
-  subChapterTitle: any;
+  subChapterTitle: string;
+  subChapterPath: string;
+  seriesTitle: string;
 }
 
-const SubChapter: React.FC<SubChapterProps> = ({ subChapterTitle }) => {
+const SubChapter: React.FC<SubChapterProps> = ({
+  subChapterTitle,
+  subChapterPath,
+  seriesTitle,
+}) => {
   const [isLargerThan400] = useMediaQuery("(min-width: 400px)");
+
   return (
     <Flex
       alignItems={"center"}
@@ -28,9 +34,21 @@ const SubChapter: React.FC<SubChapterProps> = ({ subChapterTitle }) => {
       borderBottom={"1px"}
       _hover={{ color: isMobile ? {} : "cyan.500" }}
     >
-      <Text fontSize={"md"} letterSpacing={"tight"} width={"100%"}>
+      <Link
+        href={
+          "/readnovel?" +
+          createSearchParams({
+            chapterpath: subChapterPath,
+            seriestitle: seriesTitle,
+            chaptertitle: subChapterTitle,
+          }).toString()
+        }
+        fontSize={"md"}
+        letterSpacing={"tight"}
+        width={"100%"}
+      >
         {subChapterTitle}
-      </Text>
+      </Link>
 
       <Text
         fontSize={isLargerThan400 ? "md" : "xs"}

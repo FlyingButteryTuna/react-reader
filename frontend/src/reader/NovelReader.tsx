@@ -1,19 +1,43 @@
 import { useEffect, useState } from "react";
 import { isFirefox, isMobileSafari, isSafari } from "react-device-detect";
-import { readerModes } from "./reader/settings-consts/readerSettings.ts";
+import { readerModes } from "./settings-consts/readerSettings.ts";
 import { Box, Flex, Interpolation, Slide, Text } from "@chakra-ui/react";
-import SettingsWindow from "./reader/settings-window/SettingsWindow.tsx";
-import SettingsBar from "./reader/settings-bar/SettingsBar.tsx";
-import { useReaderSettings } from "./reader/states/readerSettings.ts";
+import SettingsWindow from "./settings-window/SettingsWindow.tsx";
+import SettingsBar from "./settings-bar/SettingsBar.tsx";
+import { useReaderSettings } from "./states/readerSettings.ts";
+import { useQuery } from "@tanstack/react-query";
 import {
+  useBreadCrumbs,
   useShouldScrollToStart,
   useWindowVisibility,
-} from "./reader/states/miscReaderStates.ts";
+} from "./states/miscReaderStates.ts";
+import { useQueryParams } from "../useQueryParams.ts";
+import axios from "axios";
+import { ChapterBody } from "../novelview/types.ts";
+import LoadingScreenSpinner from "../FullScreenSpinner.tsx";
 
-function App() {
-  let paragraphs = [
-    "　そこは一面緑の<ruby>草叢<rt>くさむら</rt></ruby>に覆われた丘陵地帯だった。まだ日は高く、時間的に昼過ぎくらいだろうか。緑の水面を吹き付ける風が撫で、草の波が岩に腰かけた自分へと向かって押し寄せて来る。吹き付ける風には緑の青臭さと、湿った土の薫りが混じり合い鼻孔に届く。そして背後にある森の木々をその風がざわめかせ、駆け抜けていく。",
-  ];
+const NovelReader = () => {
+  let queryParams = useQueryParams();
+  const chapterPathParam = queryParams.get("chapterpath");
+  const seriesTitleParam = queryParams.get("seriestitle");
+  const chapterTitleParam = queryParams.get("chaptertitle");
+
+  const setSeriesTitle = useBreadCrumbs((state) => state.setSeriesTitle);
+  const setChapterTitle = useBreadCrumbs((state) => state.setChapterTitle);
+
+  const novelChapterQuery = useQuery({
+    queryKey: ["novelData"],
+    queryFn: async () => {
+      const response = await axios.get<ChapterBody>("/api/v1/demo/test", {
+        params: {
+          path: chapterPathParam,
+        },
+        withCredentials: true,
+      });
+      const data = await response.data;
+      return data;
+    },
+  });
 
   const fontSize = useReaderSettings((state) => state.fontSize);
   const lineSpacing = useReaderSettings((state) => state.lineSpacing);
@@ -36,7 +60,6 @@ function App() {
   );
 
   const [sidebarVisibility, setSidebarVisibility] = useState(true);
-
   const [horizontalStartPos, setHorizontalStartPos] = useState(-1);
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -157,10 +180,6 @@ function App() {
     }
   };
 
-  for (let i = 0; i < 20; i++) {
-    paragraphs.push(paragraphs[0].concat("penis" + i));
-  }
-
   useEffect(() => {
     if (isYokogumi) {
       setScrollWidthScale(-1.0); //reset scroll restoration on reader mode change
@@ -252,6 +271,20 @@ function App() {
   const hideSettingsBarThreshold = -5;
   const startAreaThreshold = 18;
 
+  if (novelChapterQuery.isLoading) return <LoadingScreenSpinner />;
+
+  if (
+    novelChapterQuery.data == undefined ||
+    !seriesTitleParam ||
+    !chapterPathParam ||
+    !chapterTitleParam
+  ) {
+    return <></>;
+  }
+
+  setSeriesTitle(seriesTitleParam);
+  setChapterTitle(chapterTitleParam);
+
   return (
     <>
       <style
@@ -333,7 +366,7 @@ function App() {
           userSelect={isWindowHidden ? "auto" : "none"}
           cursor={isWindowHidden ? "auto" : "default"}
         >
-          {paragraphs.map((object, i) => {
+          {novelChapterQuery.data.chapter_body.map((object, i) => {
             return (
               <Text
                 dangerouslySetInnerHTML={{
@@ -347,6 +380,6 @@ function App() {
       </Flex>
     </>
   );
-}
+};
 
-export default App;
+export default NovelReader;

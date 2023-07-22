@@ -14,3 +14,7 @@ export type NovelData = {
   series_description: string;
   chapter_index: Array<ChapterData>;
 };
+
+export type ChapterBody = {
+  chapter_body: Array<string>;
+};

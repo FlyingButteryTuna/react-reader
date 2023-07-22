@@ -1,19 +1,23 @@
-import { Box, Flex, Skeleton, Spinner, useMediaQuery } from "@chakra-ui/react";
+import { Box, Flex, useMediaQuery } from "@chakra-ui/react";
 import NovelViewHeader from "./ViewHeader";
 import ChapterList from "./ChapterList";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { NovelData } from "./types";
+import LoadingScreenSpinner from "../FullScreenSpinner";
+import { useQueryParams } from "../useQueryParams";
 
 const NovelView = () => {
   const [isLargerThan665] = useMediaQuery("(min-width: 665px)");
+  const queryParams = useQueryParams();
+  let novelPath = queryParams.get("novelpath");
 
   const novelDataQuery = useQuery({
     queryKey: ["novelData"],
     queryFn: async () => {
       const response = await axios.get<NovelData>("/api/v1/demo/test1", {
         params: {
-          path: "/n8611bv/",
+          path: novelPath,
         },
         withCredentials: true,
       });
@@ -22,17 +26,7 @@ const NovelView = () => {
     },
   });
 
-  if (novelDataQuery.isLoading)
-    return (
-      <Flex
-        width={"100vw"}
-        height={"100vh"}
-        justifyContent={"center"}
-        alignItems={"center"}
-      >
-        <Spinner size={"xl"}></Spinner>
-      </Flex>
-    );
+  if (novelDataQuery.isLoading) return <LoadingScreenSpinner />;
 
   if (novelDataQuery.data == undefined) {
     return <></>;
@@ -53,6 +47,7 @@ const NovelView = () => {
         ></NovelViewHeader>
 
         <ChapterList
+          seriesTitle={novelDataQuery.data.series_title}
           chapterIndex={novelDataQuery.data.chapter_index}
         ></ChapterList>
       </Flex>

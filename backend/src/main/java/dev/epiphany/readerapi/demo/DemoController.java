@@ -15,7 +15,7 @@ public class DemoController {
     private final ParserNarou parserNarou;
     private final AddNovelService addNovelService;
     @GetMapping("/test")
-    public ResponseEntity<String> test(@RequestBody ChapterBodyRequest request) throws IOException {
+    public ResponseEntity<String> test(ChapterBodyRequest request) throws IOException {
 
         return ResponseEntity.ok(parserNarou.parseChapterText(request.getPath()).toString());
     }

@@ -4,9 +4,13 @@ import { ChapterData } from "./types";
 
 interface ChapterListProps {
   chapterIndex: Array<ChapterData>;
+  seriesTitle: string;
 }
 
-const ChapterList: React.FC<ChapterListProps> = ({ chapterIndex }) => {
+const ChapterList: React.FC<ChapterListProps> = ({
+  chapterIndex,
+  seriesTitle,
+}) => {
   const { colorMode } = useColorMode();
 
   return (
@@ -24,7 +28,7 @@ const ChapterList: React.FC<ChapterListProps> = ({ chapterIndex }) => {
               fontSize={"xl"}
               fontWeight={"extrabold"}
               bgColor={colorMode == "dark" ? "gray.700" : "gray.200"}
-              mb={4}
+              mb={2}
             >
               {chapter.chapter_title}
             </Heading>
@@ -33,6 +37,8 @@ const ChapterList: React.FC<ChapterListProps> = ({ chapterIndex }) => {
                 return (
                   <SubChapter
                     subChapterTitle={subchapter.chapter_subtitle}
+                    subChapterPath={subchapter.chapter_link}
+                    seriesTitle={seriesTitle}
                     key={index}
                   ></SubChapter>
                 );
