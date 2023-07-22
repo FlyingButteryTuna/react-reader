@@ -1,4 +1,4 @@
-import { Box, Flex, useMediaQuery } from "@chakra-ui/react";
+import { Flex, useMediaQuery } from "@chakra-ui/react";
 import NovelViewHeader from "./ViewHeader";
 import ChapterList from "./ChapterList";
 import axios from "axios";
@@ -8,12 +8,11 @@ import LoadingScreenSpinner from "../FullScreenSpinner";
 import { useQueryParams } from "../useQueryParams";
 
 const NovelView = () => {
-  const [isLargerThan665] = useMediaQuery("(min-width: 665px)");
   const queryParams = useQueryParams();
   let novelPath = queryParams.get("novelpath");
 
   const novelDataQuery = useQuery({
-    queryKey: ["novelData"],
+    queryKey: ["novelData", novelPath],
     queryFn: async () => {
       const response = await axios.get<NovelData>("/api/v1/demo/test1", {
         params: {
@@ -24,7 +23,10 @@ const NovelView = () => {
       const data = await response.data;
       return data;
     },
+    staleTime: 100000,
   });
+
+  const [isLargerThan665] = useMediaQuery("(min-width: 665px)");
 
   if (novelDataQuery.isLoading) return <LoadingScreenSpinner />;
 
@@ -33,13 +35,18 @@ const NovelView = () => {
   }
 
   return (
-    <Box width={"100vw"} height={"fit-content"} py={4}>
+    <Flex
+      width={"100vw"}
+      height={"fit-content"}
+      py={4}
+      justifyContent={"center"}
+    >
       <Flex
         flexDir={"column"}
         justifyContent={"center"}
         alignItems={"center"}
         maxWidth={"665px"}
-        mx={isLargerThan665 ? "auto" : 2}
+        mx={isLargerThan665 ? "unset" : 2}
       >
         <NovelViewHeader
           series_title={novelDataQuery.data.series_title}
@@ -51,7 +58,7 @@ const NovelView = () => {
           chapterIndex={novelDataQuery.data.chapter_index}
         ></ChapterList>
       </Flex>
-    </Box>
+    </Flex>
   );
 };
 

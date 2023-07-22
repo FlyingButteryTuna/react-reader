@@ -26,7 +26,7 @@ const NovelReader = () => {
   const setChapterTitle = useBreadCrumbs((state) => state.setChapterTitle);
 
   const novelChapterQuery = useQuery({
-    queryKey: ["novelData"],
+    queryKey: ["novelData", chapterPathParam],
     queryFn: async () => {
       const response = await axios.get<ChapterBody>("/api/v1/demo/test", {
         params: {
@@ -37,6 +37,7 @@ const NovelReader = () => {
       const data = await response.data;
       return data;
     },
+    staleTime: 100000,
   });
 
   const fontSize = useReaderSettings((state) => state.fontSize);

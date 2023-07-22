@@ -16,12 +16,13 @@ public class DemoController {
     private final AddNovelService addNovelService;
     @GetMapping("/test")
     public ResponseEntity<String> test(ChapterBodyRequest request) throws IOException {
-
+        System.out.println("fetching chapter: " + request.getPath());
         return ResponseEntity.ok(parserNarou.parseChapterText(request.getPath()).toString());
     }
 
     @GetMapping("/test1")
     public ResponseEntity<String> test1(ChapterBodyRequest request) {
+        System.out.println("fetching series info: " + request.getPath());
         return ResponseEntity.ok(parserNarou.parseChapterList(request.getPath()).toString());
     }
 

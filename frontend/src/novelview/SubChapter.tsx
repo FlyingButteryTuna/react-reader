@@ -12,6 +12,7 @@ import {
 import { isMobile } from "react-device-detect";
 import { GoKebabHorizontal } from "react-icons/go";
 import { createSearchParams } from "react-router-dom";
+import { Link as LinkReact } from "react-router-dom";
 
 interface SubChapterProps {
   subChapterTitle: string;
@@ -31,11 +32,11 @@ const SubChapter: React.FC<SubChapterProps> = ({
       alignItems={"center"}
       flexDir={"row"}
       mb={4}
-      borderBottom={"1px"}
-      _hover={{ color: isMobile ? {} : "cyan.500" }}
+      borderBottom={"1px dotted"}
     >
       <Link
-        href={
+        as={LinkReact}
+        to={
           "/readnovel?" +
           createSearchParams({
             chapterpath: subChapterPath,
@@ -46,15 +47,20 @@ const SubChapter: React.FC<SubChapterProps> = ({
         fontSize={"md"}
         letterSpacing={"tight"}
         width={"100%"}
+        _hover={{
+          color: "cyan.500",
+          textDecoration: "underline",
+        }}
+        fontWeight={"300"}
       >
         {subChapterTitle}
       </Link>
 
       <Text
-        fontSize={isLargerThan400 ? "md" : "xs"}
+        fontSize={isLargerThan400 ? "md" : "2xs"}
         color={"chakra-subtle-text"}
       >
-        24/2/22
+        11/07/23
       </Text>
 
       <Menu gutter={4} isLazy={true} placement="bottom">
@@ -64,8 +70,7 @@ const SubChapter: React.FC<SubChapterProps> = ({
           display={"flex"}
           icon={<GoKebabHorizontal />}
           variant={"unstyled"}
-          borderColor={"white"}
-          rounded={0}
+          height={"min-content"}
           color={"chakra-body-text"}
           _hover={{ color: isMobile ? {} : "cyan.500" }}
         />

@@ -56,7 +56,6 @@ public class ParserNarou implements Parser {
 
     @Override
     public ObjectNode parseChapterList(String path) {
-        System.out.println(path);
         String seriesPathRegex = "/n\\d{4}[A-Za-z]{2}/";
         Pattern pattern = Pattern.compile(seriesPathRegex);
         Matcher matcher = pattern.matcher(path);

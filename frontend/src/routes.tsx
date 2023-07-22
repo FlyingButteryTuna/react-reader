@@ -3,6 +3,7 @@ import AuthorizationForm from "./auth/authorization/AuthorizationForm.tsx";
 import RegistrationForm from "./auth/registration/RegistrationForm.tsx";
 import NovelView from "./novelview/NovelView.tsx";
 import NovelReader from "./reader/NovelReader.tsx";
+import RootComp from "./RootComp.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -20,5 +21,9 @@ export const router = createBrowserRouter([
   {
     path: "/readnovel",
     element: <NovelReader />,
+  },
+  {
+    path: "/",
+    element: <RootComp />,
   },
 ]);
