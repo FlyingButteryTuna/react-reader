@@ -22,7 +22,7 @@ const ChoiceSettings: React.FC<ChoiceSettingsProps> = ({
   shouldToggleScrollRestoration,
 }) => {
   const toggleScrollRestoration = useShouldScrollToStart(
-    (state) => state.toggleScrollRestoration
+    (state) => state.enableScrollRestoration
   );
   const handleChange = (value: any) => {
     if (shouldToggleScrollRestoration) {

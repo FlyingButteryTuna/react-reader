@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
-import { isFirefox, isMobileSafari, isSafari } from "react-device-detect";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  isFirefox,
+  isMobile,
+  isMobileSafari,
+  isSafari,
+} from "react-device-detect";
 import { readerModes } from "./settings-consts/readerSettings.ts";
 import { Box, Flex, Interpolation, Slide, Text } from "@chakra-ui/react";
 import SettingsWindow from "./settings-window/SettingsWindow.tsx";
@@ -49,8 +54,8 @@ const NovelReader = () => {
   const shouldScrollToStart = useShouldScrollToStart(
     (state) => state.shouldScrollToStart
   );
-  const toggleScrollRestoration = useShouldScrollToStart(
-    (state) => state.toggleScrollRestoration
+  const enableScrollRestoration = useShouldScrollToStart(
+    (state) => state.enableScrollRestoration
   );
   const disableScrollRestoration = useShouldScrollToStart(
     (state) => state.disableScrollRestoration
@@ -61,17 +66,26 @@ const NovelReader = () => {
   );
 
   const [sidebarVisibility, setSidebarVisibility] = useState(true);
-  const [horizontalStartPos, setHorizontalStartPos] = useState(-1);
+  const horizontalStartPos = useRef(-1);
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
-  const [scrollWidthScale, setScrollWidthScale] = useState(-1.0);
+  const scrollWidthScale = useRef(-1.0);
+
+  const isTategumi = readerMode == readerModes.Tategumi;
+  const isYokogumi = readerMode == readerModes.Yokogumi;
 
   enum screenOrientation {
     portrait,
     landscape,
   }
+
+  const showSettingsBarThreshold = 1;
+  const hideSettingsBarThreshold = -5;
+  const startAreaThreshold = 18;
+
+  console.log("rerender");
 
   const handleResize = () => {
     let oldOrientation =
@@ -82,8 +96,9 @@ const NovelReader = () => {
       window.innerWidth / window.innerHeight > 1
         ? screenOrientation.landscape
         : screenOrientation.portrait;
+
     if (oldOrientation != newOrientation) {
-      toggleScrollRestoration();
+      enableScrollRestoration();
     }
     setWindowSize({
       width: window.innerWidth,
@@ -91,13 +106,18 @@ const NovelReader = () => {
     });
   };
 
+  const lastWidthScrollPos = useRef(0);
+
   const handleScroll = (scrollLeft: number, isReverse: boolean) => {
+    let scrollStart = document.body.scrollWidth - window.innerWidth;
+
     if (isMobileSafari) {
-      setScrollWidthScale(
-        scrollLeft / (document.body.scrollWidth - window.innerWidth)
-      );
+      scrollWidthScale.current = scrollLeft / scrollStart;
+      if (scrollStart != horizontalStartPos.current)
+        horizontalStartPos.current = scrollStart;
     }
-    let scrollSpeedDelta = Math.abs(scrollLeft) - lastWidthScrollPos;
+
+    let scrollSpeedDelta = Math.abs(scrollLeft) - lastWidthScrollPos.current;
     let shouldShow = isReverse
       ? scrollSpeedDelta < -showSettingsBarThreshold
       : scrollSpeedDelta > showSettingsBarThreshold;
@@ -105,17 +125,22 @@ const NovelReader = () => {
       ? scrollSpeedDelta > -hideSettingsBarThreshold
       : scrollSpeedDelta < hideSettingsBarThreshold;
 
-    if (shouldShow && sidebarVisibility && lastWidthScrollPos != 0) {
+    if (shouldShow && sidebarVisibility && lastWidthScrollPos.current != 0) {
       setSidebarVisibility(false);
-    } else if (shouldHide && !sidebarVisibility && lastWidthScrollPos != 0) {
+    } else if (
+      shouldHide &&
+      !sidebarVisibility &&
+      lastWidthScrollPos.current != 0
+    ) {
       setSidebarVisibility(true);
     }
-    lastWidthScrollPos = Math.abs(scrollLeft);
+    lastWidthScrollPos.current = Math.abs(scrollLeft);
     shouldShow = isReverse
-      ? horizontalStartPos - startAreaThreshold < lastWidthScrollPos
-      : startAreaThreshold > lastWidthScrollPos;
+      ? horizontalStartPos.current - startAreaThreshold <
+        lastWidthScrollPos.current
+      : startAreaThreshold > lastWidthScrollPos.current;
 
-    if (shouldShow) {
+    if (shouldShow && !sidebarVisibility) {
       setSidebarVisibility(true);
     }
   };
@@ -181,53 +206,58 @@ const NovelReader = () => {
     }
   };
 
+  useLayoutEffect(() => {
+    if ((!isSafari && isTategumi) || isYokogumi || isMobileSafari)
+      window.addEventListener("scroll", handleScrollWindow);
+
+    return () => {
+      if ((!isSafari && isTategumi) || isYokogumi || isMobileSafari)
+        window.removeEventListener("scroll", handleScrollWindow);
+    };
+  }, [handleScrollWindow]);
+
   useEffect(() => {
-    if (isYokogumi) {
-      setScrollWidthScale(-1.0); //reset scroll restoration on reader mode change
+    if (
+      shouldScrollToStart &&
+      isTategumi &&
+      isMobileSafari &&
+      document.body.scrollWidth != window.innerWidth
+    ) {
+      window.scrollTo(document.body.scrollWidth - window.innerWidth, 0); //scroll to the right (start)
+      horizontalStartPos.current =
+        document.body.scrollWidth - window.innerWidth;
+      if (scrollWidthScale.current != -1.0) {
+        window.scrollTo(
+          (document.body.scrollWidth - window.innerWidth) *
+            scrollWidthScale.current,
+          0
+        ); //scroll restoration
+        scrollWidthScale.current = -1.0;
+      } else {
+        setSidebarVisibility(true); //show settings bar on initial load
+      }
+      console.log(document.body.scrollWidth - window.innerWidth);
+      disableScrollRestoration();
     }
+
+    if (isTategumi && !isSafari && !isMobile) {
+      window.addEventListener("wheel", handleWheelScrollWindow);
+    }
+
     if ((isMobileSafari || isSafari) && isTategumi) {
       window.addEventListener("resize", handleResize); //handle resize for safari (outer div width/height is constrained by wSize)
     }
 
-    if (shouldScrollToStart && isTategumi && isMobileSafari) {
-      window.scrollTo(document.body.scrollWidth - window.innerWidth, 0); //scroll to the right (start)
-      setHorizontalStartPos(window.scrollX); //store new position as initial scroll value
-
-      if (scrollWidthScale != -1.0) {
-        window.scrollTo(
-          (document.body.scrollWidth - window.innerWidth) * scrollWidthScale,
-          0
-        ); //scroll restoration
-        setScrollWidthScale(-1.0);
-      } else {
-        setSidebarVisibility(true); //show settings bar on initial load
-      }
-    }
-
-    if (isTategumi) {
-      window.addEventListener("wheel", handleWheelScrollWindow);
-    }
-    window.addEventListener("scroll", handleScrollWindow);
-
     return () => {
-      if (isTategumi) {
+      if (isTategumi && !isMobile) {
         window.removeEventListener("wheel", handleWheelScrollWindow);
       }
-      window.removeEventListener("scroll", handleScrollWindow);
 
       if ((isMobileSafari || isSafari) && isTategumi) {
         window.removeEventListener("resize", handleResize);
-        disableScrollRestoration();
       }
     };
-  }, [
-    disableScrollRestoration,
-    handleResize,
-    handleWheelScrollWindow,
-    handleScrollWindow,
-    shouldScrollToStart,
-    setHorizontalStartPos,
-  ]);
+  }, [readerMode, novelChapterQuery.isLoading, windowSize]);
 
   const scrollBarWebKitCss = {
     "&::-webkit-scrollbar": {
@@ -247,9 +277,6 @@ const NovelReader = () => {
 
   const dimScreenFunc = "brightness(0.3)";
 
-  const isTategumi = readerMode == readerModes.Tategumi;
-  const isYokogumi = readerMode == readerModes.Yokogumi;
-
   const verticalWR = "body { writing-mode: vertical-rl }";
   const horizontalWR = "body { writing-mode: horizontal-tb }";
   const writngMode = isMobileSafari
@@ -266,11 +293,6 @@ const NovelReader = () => {
       ? outerDivWidthDesktopSafari
       : outerDivWidthBase;
   const outerDivHeight = isYokogumi ? "max-content" : "100%";
-
-  let lastWidthScrollPos = 0;
-  const showSettingsBarThreshold = 1;
-  const hideSettingsBarThreshold = -5;
-  const startAreaThreshold = 18;
 
   if (novelChapterQuery.isLoading) return <LoadingScreenSpinner />;
 
@@ -348,8 +370,14 @@ const NovelReader = () => {
         pl={isTategumi ? "undet" : "4%"}
         filter={isWindowHidden ? "unset" : dimScreenFunc}
         onClick={handleCloseSettingsOnClick}
-        onWheel={isSafari && !isMobileSafari ? handleWheelScrollDiv : () => {}}
-        onScroll={isSafari && !isMobileSafari ? handleScrollDiv : () => {}}
+        onWheel={
+          isSafari && !isMobileSafari && isTategumi
+            ? handleWheelScrollDiv
+            : () => {}
+        }
+        onScroll={
+          isSafari && !isMobileSafari && isTategumi ? handleScrollDiv : () => {}
+        }
         zIndex={1}
         sx={{
           writingMode: isMobileSafari && isTategumi ? "vertical-rl" : "inherit",
