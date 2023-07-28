@@ -27,4 +27,11 @@ public class SubChapter {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Chapter chapter;
+
+    @OneToMany(
+            mappedBy = "subChapter",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<UserSubChapter> users = new ArrayList<>();
 }

@@ -25,8 +25,14 @@ public class Novel {
 
     @Column(unique = true)
     private String urlPath;
-
     private String title;
+    private String author;
+
+    @Enumerated(value = EnumType.STRING)
+    private NovelType novelType;
+
+    @Enumerated(value = EnumType.STRING)
+    private NovelStatus novelStatus;
 
     @ManyToMany(mappedBy = "novels")
     private Set<User> users = new HashSet<>();

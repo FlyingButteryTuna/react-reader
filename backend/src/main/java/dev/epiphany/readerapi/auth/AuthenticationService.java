@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.session.ConcurrentSession
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -40,6 +41,7 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(requestBody.getPassword()))
                 .role(Role.USER)
                 .novels(new HashSet<>())
+                .subChapters(new ArrayList<>())
                 .build();
         var savedUser = repository.save(user);
         return AuthenticationResponse.builder()

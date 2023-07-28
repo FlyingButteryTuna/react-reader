@@ -85,8 +85,6 @@ const NovelReader = () => {
   const hideSettingsBarThreshold = -5;
   const startAreaThreshold = 18;
 
-  console.log("rerender");
-
   const handleResize = () => {
     let oldOrientation =
       windowSize.width / windowSize.height > 1
@@ -247,9 +245,10 @@ const NovelReader = () => {
     if ((isMobileSafari || isSafari) && isTategumi) {
       window.addEventListener("resize", handleResize); //handle resize for safari (outer div width/height is constrained by wSize)
     }
-
+    console.log("effect");
     return () => {
-      if (isTategumi && !isMobile) {
+      console.log("effect q");
+      if (isTategumi && !isSafari && !isMobile) {
         window.removeEventListener("wheel", handleWheelScrollWindow);
       }
 
@@ -257,7 +256,12 @@ const NovelReader = () => {
         window.removeEventListener("resize", handleResize);
       }
     };
-  }, [readerMode, novelChapterQuery.isLoading, windowSize]);
+  }, [
+    readerMode,
+    novelChapterQuery.isLoading,
+    handleResize,
+    handleWheelScrollWindow,
+  ]);
 
   const scrollBarWebKitCss = {
     "&::-webkit-scrollbar": {

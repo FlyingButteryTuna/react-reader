@@ -1,8 +1,8 @@
 package dev.epiphany.readerapi.novels;
 
+import dev.epiphany.readerapi.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "novel_subchapter")
-public class NovelSubChapter {
+@Table(name = "user_subchapter")
+public class UserSubChapter {
     @EmbeddedId
-    private NovelSubChapterId id;
+    private UserSubChapterId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("novelId")
-    private Novel novel;
+    @MapsId("userId")
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("subchapterId")
@@ -26,9 +26,11 @@ public class NovelSubChapter {
     @Column(name = "is_read")
     private boolean isRead = false;
 
-    public NovelSubChapter(Novel novel, SubChapter subChapter){
-        this.novel = novel;
+    @Column(name = "is_bookmarked")
+    private boolean isBookmarked = false;
+    public UserSubChapter(User user, SubChapter subChapter){
+        this.user = user;
         this.subChapter = subChapter;
-        this.id = new NovelSubChapterId(novel.getId(), subChapter.getId());
+        this.id = new UserSubChapterId(user.getId(), subChapter.getId());
     }
 }

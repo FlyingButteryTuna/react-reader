@@ -1,2 +1,15 @@
-package dev.epiphany.readerapi.demo;public class ChapterBookmarkRequest {
+package dev.epiphany.readerapi.demo;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ChapterBookmarkRequest {
+    private String path;
+    private Boolean isBookmarked;
 }

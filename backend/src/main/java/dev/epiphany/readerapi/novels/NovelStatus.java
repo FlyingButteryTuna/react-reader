@@ -1,2 +1,6 @@
-package dev.epiphany.readerapi.novels;public enum NovelStatus {
+package dev.epiphany.readerapi.novels;
+
+public enum NovelStatus {
+    ONGOING,
+    FINISHED,
 }

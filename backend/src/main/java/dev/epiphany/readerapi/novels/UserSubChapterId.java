@@ -15,9 +15,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class NovelSubChapterId implements Serializable {
-    @Column(name = "novel_id")
-    private Integer novelId;
+public class UserSubChapterId implements Serializable {
+    @Column(name = "user_id")
+    private Integer userId;
 
     @Column(name = "subchapter_id")
     private Integer subchapterId;
