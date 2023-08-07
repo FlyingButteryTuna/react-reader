@@ -1,6 +1,5 @@
 package dev.epiphany.readerapi.demo;
 
-import dev.epiphany.readerapi.novels.Novel;
 import dev.epiphany.readerapi.parsers.ParserNarou;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

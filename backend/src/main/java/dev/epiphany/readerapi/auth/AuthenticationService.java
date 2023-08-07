@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +30,6 @@ public class AuthenticationService {
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
     private final SecurityContextRepository securityContextRepository;
     private final ConcurrentSessionControlAuthenticationStrategy sessionControlAuthenticationStrategy;
-    private final SessionRegistry sessionRegistry;
 
     public AuthenticationResponse register(RegisterRequest requestBody, HttpServletRequest request,
                                            HttpServletResponse response) {

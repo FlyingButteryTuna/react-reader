@@ -1,6 +1,5 @@
 package dev.epiphany.readerapi.auth;
 
-import dev.epiphany.readerapi.user.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

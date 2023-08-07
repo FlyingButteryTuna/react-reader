@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -33,5 +31,5 @@ public class SubChapter {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<UserSubChapter> users = new ArrayList<>();
+    private List<UserSubChapter> users;
 }

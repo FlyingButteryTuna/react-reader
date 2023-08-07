@@ -3,7 +3,6 @@ import dev.epiphany.readerapi.novels.Novel;
 import dev.epiphany.readerapi.novels.UserSubChapter;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,14 +36,14 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "novel_id")
     )
-    private Set<Novel> novels = new HashSet<>();
+    private Set<Novel> novels;
 
     @OneToMany(
             mappedBy = "user",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<UserSubChapter> subChapters = new ArrayList<>();
+    private List<UserSubChapter> subChapters;
 
     public void addNovel(Novel novel) {
         novels.add(novel);

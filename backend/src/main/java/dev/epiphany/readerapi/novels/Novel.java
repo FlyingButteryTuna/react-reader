@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.*;
 
 @Data
@@ -35,14 +34,14 @@ public class Novel {
     private NovelStatus novelStatus;
 
     @ManyToMany(mappedBy = "novels")
-    private Set<User> users = new HashSet<>();
+    private Set<User> users;
 
     @OneToMany(
             mappedBy = "novel",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Chapter> chapters = new ArrayList<>();
+    private List<Chapter> chapters;
 
     public void addChapter(Chapter chapter) {
         chapters.add(chapter);

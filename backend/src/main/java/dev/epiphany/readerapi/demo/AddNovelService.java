@@ -2,10 +2,8 @@ package dev.epiphany.readerapi.demo;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.epiphany.readerapi.novels.*;
-import dev.epiphany.readerapi.user.User;
 import dev.epiphany.readerapi.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
