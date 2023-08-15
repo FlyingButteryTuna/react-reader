@@ -1,4 +1,4 @@
-package dev.epiphany.readerapi.auth;
+package dev.epiphany.readerapi.demo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
-    private String email;
-    private String password;
+public class ChapterBodyRequest {
+    private String path;
 }

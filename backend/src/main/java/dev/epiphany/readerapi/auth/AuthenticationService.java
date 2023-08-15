@@ -12,11 +12,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +30,6 @@ public class AuthenticationService {
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
     private final SecurityContextRepository securityContextRepository;
     private final ConcurrentSessionControlAuthenticationStrategy sessionControlAuthenticationStrategy;
-    private final SessionRegistry sessionRegistry;
 
     public AuthenticationResponse register(RegisterRequest requestBody, HttpServletRequest request,
                                            HttpServletResponse response) {
@@ -36,6 +37,8 @@ public class AuthenticationService {
                 .email(requestBody.getEmail())
                 .password(passwordEncoder.encode(requestBody.getPassword()))
                 .role(Role.USER)
+                .novels(new HashSet<>())
+                .subChapters(new ArrayList<>())
                 .build();
         var savedUser = repository.save(user);
         return AuthenticationResponse.builder()
@@ -51,10 +54,7 @@ public class AuthenticationService {
                         requestBody.getPassword()
                 )
         );
-        System.out.println(sessionRegistry.getAllSessions(auth.getPrincipal(), false).size());
-        System.out.println("login");
         sessionControlAuthenticationStrategy.onAuthentication(auth, request, response);
-        System.out.println("login1");
         var user = repository.findByEmail(requestBody.getEmail()).orElseThrow();
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();

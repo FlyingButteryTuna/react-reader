@@ -22,7 +22,6 @@ public class AuthController {
             HttpServletResponse response
 
     ) {
-        System.out.println("reg");
         return ResponseEntity.ok(authenticationService.register(requestBody, request, response));
     }
 

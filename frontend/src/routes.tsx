@@ -1,7 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
 import AuthorizationForm from "./auth/authorization/AuthorizationForm.tsx";
 import RegistrationForm from "./auth/registration/RegistrationForm.tsx";
-import App from "./App.tsx";
+import NovelView from "./novelview/NovelView.tsx";
+import NovelReader from "./reader/NovelReader.tsx";
+import RootComp from "./RootComp.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -13,7 +15,15 @@ export const router = createBrowserRouter([
     element: <RegistrationForm />,
   },
   {
-    path: "/test",
-    element: <App />,
+    path: "/novel",
+    element: <NovelView />,
+  },
+  {
+    path: "/readnovel",
+    element: <NovelReader />,
+  },
+  {
+    path: "/",
+    element: <RootComp />,
   },
 ]);
