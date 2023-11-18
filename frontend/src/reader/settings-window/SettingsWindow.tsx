@@ -13,6 +13,7 @@ import ChoiceSettings from "./settings-reader/ChoiceSettings.tsx";
 import { useReaderSettings } from "../states/readerSettings.ts";
 import { isMobileSafari } from "react-device-detect";
 import { useWindowVisibility } from "../states/miscReaderStates.ts";
+import React from "react";
 
 const SettingsWindow = () => {
   const isWindowHidden = useWindowVisibility((state) => state.isWindowHidden);
@@ -161,7 +162,7 @@ const SettingsWindow = () => {
           settingsArray={vMargins}
           settingHeader={"余白サイズ"}
           forceRepaint={true}
-          lockSetting={readerMode == readerModes.Tategumi ? false : true}
+          lockSetting={readerMode != readerModes.Tategumi}
           increaseFunc={useReaderSettings((state) => state.increaseVMargins)}
           decreaseFunc={useReaderSettings((state) => state.decreaseVmargins)}
         ></IncDecSettings>
@@ -179,7 +180,7 @@ const SettingsWindow = () => {
           settings={modeSettings}
           setSetting={useReaderSettings((state) => state.setMode)}
           defaultValue={readerMode.toString()}
-          shouldToggleScrollRestoration={isMobileSafari ? true : false}
+          shouldToggleScrollRestoration={isMobileSafari}
         ></ChoiceSettings>
       </Box>
 

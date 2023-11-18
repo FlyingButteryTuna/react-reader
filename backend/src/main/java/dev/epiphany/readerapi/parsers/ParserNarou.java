@@ -1,25 +1,31 @@
 package dev.epiphany.readerapi.parsers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.NoArgsConstructor;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import lombok.NoArgsConstructor;
 
 
 @NoArgsConstructor
 @Service
 public class ParserNarou implements Parser {
     final private String baseLink = "https://ncode.syosetu.com";
+    final private String baseNovelInfoLink = "https://ncode.syosetu.com/novelview/infotop/ncode";
 
     @Override
     public ObjectNode parseChapterText(String path) throws IOException {
@@ -54,7 +60,7 @@ public class ParserNarou implements Parser {
     }
 
     @Override
-    public ObjectNode parseChapterList(String path) {
+    public ObjectNode parseChapterList(String path) throws ParseException {
         String seriesPathRegex = "/n\\d{4}[A-Za-z]{2}/";
         Pattern pattern = Pattern.compile(seriesPathRegex);
         Matcher matcher = pattern.matcher(path);
@@ -74,18 +80,25 @@ public class ParserNarou implements Parser {
         ObjectNode chapterIndexRoot =  objectMapper.createObjectNode();
         ArrayNode chapterIndex = objectMapper.createArrayNode();
 
-        Document doc;
+        Document docHonbun;
+        Document docNovelInfo;
         try {
-            doc = Jsoup.connect(baseLink + path).get();
+            docHonbun = Jsoup.connect(baseLink + path).get();
         } catch (IOException e) {
             throw new RuntimeException("Could not fetch data from given path. Invalid link.");
         }
 
-        if (doc.getElementById(chapterBodyDivId) != null){
+        try {
+            docNovelInfo = Jsoup.connect(baseNovelInfoLink + path).get();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not fetch data from given path. Invalid link.");
+        }
+
+        if (docHonbun.getElementById(chapterBodyDivId) != null){
             throw new RuntimeException("Couldn't fetch list of chapters - Short story.");
         }
 
-        Elements content = Objects.requireNonNull(doc.getElementsByClass(seriesIndexBoxId),
+        Elements content = Objects.requireNonNull(docHonbun.getElementsByClass(seriesIndexBoxId),
                         "Could not fetch data from given path. Invalid HTML.").get(0).children();
 
         for (Element el : content) {
@@ -106,6 +119,12 @@ public class ParserNarou implements Parser {
 
                 chapter.put("chapter_link", linkEl.attr("href"));
                 chapter.put("chapter_subtitle", linkEl.text());
+                
+                SimpleDateFormat dateFormat = new SimpleDateFormat("\nyyyy/MM/dd HH:mm");
+                Date date = dateFormat.parse(el.getElementsByClass("long_update").get(0).wholeText().replaceAll("（改）", ""));
+                long publicationDateTimestamp = date.getTime();
+                
+                chapter.put("publication_date", publicationDateTimestamp);
 
                 chapterIndex.add(chapter);
             }
@@ -116,16 +135,42 @@ public class ParserNarou implements Parser {
         chapterIndexRoot.set("subchapter_list", chapterIndex);
         seriesIndex.add(chapterIndexRoot);
 
-        String title = Objects.requireNonNull(doc.getElementsByClass("novel_title"),
+        String title = Objects.requireNonNull(docHonbun.getElementsByClass("novel_title"),
                 "Could not fetch data from given path. Invalid HTML.").get(0).text();
 
-        String description = Objects.requireNonNull(doc.getElementById("novel_ex"),
+        String description = Objects.requireNonNull(docHonbun.getElementById("novel_ex"),
                 "Could not fetch data from given path. Invalid HTML.").wholeText();
 
+        String publicationDate = Objects.requireNonNull(docNovelInfo.getElementById("noveltable2"),
+                "Could not fetch data from given path. Invalid HTML.").getElementsByTag("td").get(0).wholeText();
+
+        String lastUpdateDate = Objects.requireNonNull(docNovelInfo.getElementById("noveltable2"),
+                "Could not fetch data from given path. Invalid HTML.").getElementsByTag("td").get(1).wholeText();
+
+        String seriesLength = Objects.requireNonNull(docNovelInfo.getElementById("noveltable2"),
+                "Could not fetch data from given path. Invalid HTML.").getElementsByTag("td").get(9).wholeText();
+
+        String author = Objects.requireNonNull(docHonbun.getElementsByClass("novel_writername"),
+                "Could not fetch data from given path. Invalid HTML.").get(0).wholeText();
+
         description = description.replaceAll("\\n\\n", "\n");
+        seriesLength = seriesLength.replaceAll(",", "");
+        seriesLength = seriesLength.substring(0, seriesLength.length() - 2);
+        author = author.replaceAll("\n", "");
+        author = author.replaceAll("作者：", "");
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年 MM月dd日 HH時mm分");
+        Date date = dateFormat.parse(publicationDate);
+        long publicationDateTimestamp = date.getTime();
+        date = dateFormat.parse(lastUpdateDate);
+        long lastUpdateDateTimestamp = date.getTime();
 
         rootNode.put("series_title", title);
+        rootNode.put("author", author);
         rootNode.put("series_path", path);
+        rootNode.put("publication_date", publicationDateTimestamp);
+        rootNode.put("lastupdate_date", lastUpdateDateTimestamp);
+        rootNode.put("series_length", Integer.parseInt(seriesLength));
         rootNode.put("series_description", description);
         rootNode.set("chapter_index", seriesIndex);
         return rootNode;

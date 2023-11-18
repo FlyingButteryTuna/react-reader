@@ -38,13 +38,13 @@ export const vMargins = ["1vh", "3vh", "6vh", "8vh", "10vh", "13vh", "16vh"];
 
 export const getNext = <T>(array: Array<T>, current: T): T => {
   let currentIndex = array.indexOf(current);
-  let nextIndex =
+  const nextIndex =
     currentIndex + 1 <= array.length - 1 ? ++currentIndex : currentIndex;
   return array[nextIndex];
 };
 
 export const getPrev = <T>(array: Array<T>, current: T): T => {
   let currentIndex = array.indexOf(current);
-  let prevIndex = currentIndex - 1 >= 0 ? --currentIndex : 0;
+  const prevIndex = currentIndex - 1 >= 0 ? --currentIndex : 0;
   return array[prevIndex];
 };

@@ -26,6 +26,9 @@ public class Novel {
     private String urlPath;
     private String title;
     private String author;
+    private long publicationDate;
+    private long lastupdateDate;
+    private long seriesLength;
 
     @Enumerated(value = EnumType.STRING)
     private NovelType novelType;

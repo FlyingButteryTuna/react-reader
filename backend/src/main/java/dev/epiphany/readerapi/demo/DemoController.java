@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 @RestController
 @RequestMapping("/api/v1/demo")
@@ -21,14 +22,14 @@ public class DemoController {
     }
 
     @GetMapping("/serieses")
-    public ResponseEntity<String> test1(ChapterBodyRequest request) {
+    public ResponseEntity<String> test1(ChapterBodyRequest request) throws ParseException {
         System.out.println("fetching series info: " + request.getPath());
         return ResponseEntity.ok(parserNarou.parseChapterList(request.getPath()).toString());
     }
 
     @PostMapping("/novel")
     public ResponseEntity<String> addNovel(@RequestBody ChapterBodyRequest request,
-                                           Authentication authentication) {
+                                           Authentication authentication) throws ParseException {
         System.out.println("adding novel: " + request.getPath());
         addNovelService.addNovel(parserNarou.parseChapterList(request.getPath()),
                 authentication.getName());

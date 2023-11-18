@@ -22,6 +22,7 @@ public class SubChapter {
     private String path;
 
     private String title;
+    private long publicationDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Chapter chapter;

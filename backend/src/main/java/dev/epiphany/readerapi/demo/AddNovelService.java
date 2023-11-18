@@ -23,10 +23,19 @@ public class AddNovelService {
     public void addNovel(ObjectNode chaptersIndex, String email) {
         String title = chaptersIndex.get("series_title").toString();
         String path = chaptersIndex.get("series_path").toString();
+        String author = chaptersIndex.get("author").toString();
+        long publicationDate = chaptersIndex.get("publication_date").asLong();
+        long lastupdateDate = chaptersIndex.get("lastupdate_date").asLong();
+        long seriesLength = chaptersIndex.get("series_length").asLong();
+
         var chapters = chaptersIndex.get("chapter_index");
         var novel = Novel.builder()
                 .title(title)
                 .novelSource(NovelSource.NAROU)
+                .author(author)
+                .publicationDate(publicationDate)
+                .lastupdateDate(lastupdateDate)
+                .seriesLength(seriesLength)
                 .urlPath(path)
                 .chapters(new ArrayList<>())
                 .build();
@@ -42,9 +51,11 @@ public class AddNovelService {
            for (var subchapter: subchapters) {
                String subchapterPath = subchapter.get("chapter_link").toString();
                String subchapterTitle = subchapter.get("chapter_subtitle").toString();
+               long publicationDateSC = subchapter.get("publication_date").asLong();
                var subchapterObj = SubChapter.builder()
                        .title(subchapterTitle)
                        .path(subchapterPath)
+                       .publicationDate(publicationDateSC)
                        .users(new ArrayList<>())
                        .build();
 

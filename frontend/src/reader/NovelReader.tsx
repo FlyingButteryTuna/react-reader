@@ -1,28 +1,19 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import {
-  isFirefox,
-  isMobile,
-  isMobileSafari,
-  isSafari,
-} from "react-device-detect";
-import { readerModes } from "./settings-consts/readerSettings.ts";
-import { Box, Flex, Interpolation, Slide, Text } from "@chakra-ui/react";
+import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
+import {isFirefox, isMobile, isMobileSafari, isSafari,} from "react-device-detect";
+import {readerModes} from "./settings-consts/readerSettings.ts";
+import {Box, Flex, Interpolation, Slide, Text} from "@chakra-ui/react";
 import SettingsWindow from "./settings-window/SettingsWindow.tsx";
 import SettingsBar from "./settings-bar/SettingsBar.tsx";
-import { useReaderSettings } from "./states/readerSettings.ts";
-import { useQuery } from "@tanstack/react-query";
-import {
-  useBreadCrumbs,
-  useShouldScrollToStart,
-  useWindowVisibility,
-} from "./states/miscReaderStates.ts";
-import { useQueryParams } from "../useQueryParams.ts";
+import {useReaderSettings} from "./states/readerSettings.ts";
+import {useQuery} from "@tanstack/react-query";
+import {useBreadCrumbs, useShouldScrollToStart, useWindowVisibility,} from "./states/miscReaderStates.ts";
+import {useQueryParams} from "../useQueryParams.ts";
 import axios from "axios";
-import { ChapterBody } from "../novelview/types.ts";
+import {ChapterBody} from "../novelview/types.ts";
 import LoadingScreenSpinner from "../FullScreenSpinner.tsx";
 
 const NovelReader = () => {
-  let queryParams = useQueryParams();
+  const queryParams = useQueryParams();
   const chapterPathParam = queryParams.get("chapterpath");
   const seriesTitleParam = queryParams.get("seriestitle");
   const chapterTitleParam = queryParams.get("chaptertitle");
@@ -33,14 +24,13 @@ const NovelReader = () => {
   const novelChapterQuery = useQuery({
     queryKey: ["novelData", chapterPathParam],
     queryFn: async () => {
-      const response = await axios.get<ChapterBody>("/api/v1/demo/test", {
+      const response = await axios.get<ChapterBody>("/api/v1/demo/chapters", {
         params: {
           path: chapterPathParam,
         },
         withCredentials: true,
       });
-      const data = await response.data;
-      return data;
+      return response.data;
     },
     staleTime: 100000,
   });
@@ -48,7 +38,7 @@ const NovelReader = () => {
   const fontSize = useReaderSettings((state) => state.fontSize);
   const lineSpacing = useReaderSettings((state) => state.lineSpacing);
   const vMargins = useReaderSettings((state) => state.vMargins);
-  const fontFamily = useReaderSettings((state) => state.font);
+  //const fontFamily = useReaderSettings((state) => state.font);
   const readerMode = useReaderSettings((state) => state.mode);
   const readerTheme = useReaderSettings((state) => state.theme);
   const shouldScrollToStart = useShouldScrollToStart(
@@ -86,11 +76,11 @@ const NovelReader = () => {
   const startAreaThreshold = 18;
 
   const handleResize = () => {
-    let oldOrientation =
+    const oldOrientation =
       windowSize.width / windowSize.height > 1
         ? screenOrientation.landscape
         : screenOrientation.portrait;
-    let newOrientation =
+    const newOrientation =
       window.innerWidth / window.innerHeight > 1
         ? screenOrientation.landscape
         : screenOrientation.portrait;
@@ -107,7 +97,7 @@ const NovelReader = () => {
   const lastWidthScrollPos = useRef(0);
 
   const handleScroll = (scrollLeft: number, isReverse: boolean) => {
-    let scrollStart = document.body.scrollWidth - window.innerWidth;
+    const scrollStart = document.body.scrollWidth - window.innerWidth;
 
     if (isMobileSafari) {
       scrollWidthScale.current = scrollLeft / scrollStart;
@@ -115,11 +105,11 @@ const NovelReader = () => {
         horizontalStartPos.current = scrollStart;
     }
 
-    let scrollSpeedDelta = Math.abs(scrollLeft) - lastWidthScrollPos.current;
+    const scrollSpeedDelta = Math.abs(scrollLeft) - lastWidthScrollPos.current;
     let shouldShow = isReverse
       ? scrollSpeedDelta < -showSettingsBarThreshold
       : scrollSpeedDelta > showSettingsBarThreshold;
-    let shouldHide = isReverse
+    const shouldHide = isReverse
       ? scrollSpeedDelta > -hideSettingsBarThreshold
       : scrollSpeedDelta < hideSettingsBarThreshold;
 
@@ -173,7 +163,7 @@ const NovelReader = () => {
   const handleScrollWindow = () => {
     handleScroll(
       isTategumi ? window.scrollX : window.scrollY,
-      isMobileSafari && isTategumi ? true : false
+      isMobileSafari && isTategumi
     );
   };
 
@@ -212,7 +202,7 @@ const NovelReader = () => {
       if ((!isSafari && isTategumi) || isYokogumi || isMobileSafari)
         window.removeEventListener("scroll", handleScrollWindow);
     };
-  }, [handleScrollWindow]);
+  }, [handleScrollWindow, isTategumi, isYokogumi]);
 
   useEffect(() => {
     if (
@@ -245,9 +235,8 @@ const NovelReader = () => {
     if ((isMobileSafari || isSafari) && isTategumi) {
       window.addEventListener("resize", handleResize); //handle resize for safari (outer div width/height is constrained by wSize)
     }
-    console.log("effect");
+
     return () => {
-      console.log("effect q");
       if (isTategumi && !isSafari && !isMobile) {
         window.removeEventListener("wheel", handleWheelScrollWindow);
       }
@@ -256,12 +245,7 @@ const NovelReader = () => {
         window.removeEventListener("resize", handleResize);
       }
     };
-  }, [
-    readerMode,
-    novelChapterQuery.isLoading,
-    handleResize,
-    handleWheelScrollWindow,
-  ]);
+  }, [readerMode, novelChapterQuery.isLoading, handleResize, handleWheelScrollWindow, shouldScrollToStart, isTategumi, disableScrollRestoration]);
 
   const scrollBarWebKitCss = {
     "&::-webkit-scrollbar": {
@@ -277,7 +261,7 @@ const NovelReader = () => {
       background: "#B0AEAE",
       borderRadius: "0px",
     },
-  } as Interpolation<{}>;
+  } as Interpolation<NonNullable<unknown>>;
 
   const dimScreenFunc = "brightness(0.3)";
 
@@ -349,7 +333,7 @@ const NovelReader = () => {
         }}
         direction={isTategumi ? "right" : "top"}
       >
-        <SettingsBar isVertical={isTategumi ? true : false}></SettingsBar>
+        <SettingsBar isVertical={isTategumi}></SettingsBar>
       </Slide>
 
       <Flex //outer main div
@@ -363,7 +347,8 @@ const NovelReader = () => {
         minHeight={isYokogumi ? windowSize.height : "unset"}
         bgColor={readerTheme.mainBgColor}
         textColor={readerTheme.mainTextColor}
-        fontFamily={fontFamily}
+        fontFamily={"Noto Sans Japanese"}
+        fontWeight={"thin"}
         fontSize={fontSize}
         lineHeight={lineSpacing}
         overflowY={isTategumi ? "hidden" : "auto"}
@@ -377,9 +362,11 @@ const NovelReader = () => {
         onWheel={
           isSafari && !isMobileSafari && isTategumi
             ? handleWheelScrollDiv
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
             : () => {}
         }
         onScroll={
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
           isSafari && !isMobileSafari && isTategumi ? handleScrollDiv : () => {}
         }
         zIndex={1}

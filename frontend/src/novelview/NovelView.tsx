@@ -14,7 +14,7 @@ const NovelView = () => {
   const novelDataQuery = useQuery({
     queryKey: ["novelData", novelPath],
     queryFn: async () => {
-      const response = await axios.get<NovelData>("/api/v1/demo/test1", {
+      const response = await axios.get<NovelData>("/api/v1/demo/serieses", {
         params: {
           path: novelPath,
         },
